@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#a1fe00",
+                    "on-tertiary": "#3e6600",
+                    "outline-variant": "#48474a",
+                    "error-dim": "#d73357",
+                    "on-error-container": "#ffb2b9",
+                    "on-primary-fixed-variant": "#4a006b",
+                    "primary-container": "#d37bff",
+                    "inverse-primary": "#9027c4",
+                    "primary-fixed": "#d37bff",
+                    "surface-variant": "#262528",
+                    "error": "#ff6e84",
+                    "primary-fixed-dim": "#cb66fe",
+                    "primary": "#db90ff",
+                    "primary-dim": "#d277ff",
+                    "secondary-fixed": "#26e6ff",
+                    "surface": "#0e0e10",
+                    "inverse-surface": "#fcf8fb",
+                    "on-primary-container": "#3c0057",
+                    "on-surface-variant": "#acaaad",
+                    "secondary-container": "#006875",
+                    "on-secondary-container": "#e8fbff",
+                    "tertiary-container": "#a1fe00",
+                    "inverse-on-surface": "#555557",
+                    "on-surface": "#f6f3f5",
+                    "on-tertiary-fixed": "#2b4900",
+                    "surface-container-highest": "#262528",
+                    "surface-bright": "#2c2c2f",
+                    "on-background": "#f6f3f5",
+                    "background": "#0e0e10",
+                    "surface-container-lowest": "#000000",
+                    "on-primary-fixed": "#000000",
+                    "surface-container": "#19191c",
+                    "outline": "#767577",
+                    "on-error": "#490013",
+                    "secondary-fixed-dim": "#00d7f0",
+                    "on-secondary": "#004d57",
+                    "on-tertiary-container": "#385d00",
+                    "tertiary": "#ddffb0",
+                    "tertiary-dim": "#97ee00",
+                    "secondary": "#00e3fd",
+                    "on-tertiary-fixed-variant": "#3f6800",
+                    "error-container": "#a70138",
+                    "surface-container-low": "#131315",
+                    "on-secondary-fixed-variant": "#005964",
+                    "secondary-dim": "#00d4ec",
+                    "surface-container-high": "#1f1f22",
+                    "surface-tint": "#db90ff",
+                    "tertiary-fixed-dim": "#97ee00",
+                    "on-secondary-fixed": "#003a42",
+                    "on-primary": "#4e0070",
+                    "surface-dim": "#0e0e10"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-space-grotesk { font-family: 'Space Grotesk', sans-serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar Execution -->
+<nav class="flex justify-between items-center px-8 w-full sticky top-0 z-50 bg-surface-dim/80 backdrop-blur-xl h-16 border-b border-white/5 shadow-[0_0_40px_rgba(191,90,242,0.08)]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-[#BF5AF2] dark:text-[#db90ff] font-headline">SonicPulse</span>
+<div class="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-1.5 gap-3 border border-white/5">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-label w-64 placeholder:text-outline" placeholder="Search library..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 text-[#48474a] font-medium font-label hover:text-[#00e3fd] transition-colors duration-300 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<button class="bg-primary hover:shadow-[0_0_20px_rgba(219,144,255,0.4)] text-on-primary-fixed font-bold py-2 px-6 rounded-full transition-all duration-300 text-sm font-label">
+                Sign In
+            </button>
+</div>
+</nav>
+<div class="flex min-h-screen">
+<!-- SideNavBar Execution -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 border-r border-white/5 bg-[#131315] py-8 gap-6 z-40">
+<div class="px-8 mb-4">
+<h2 class="font-space-grotesk font-bold uppercase tracking-widest text-xs text-primary">Navigation</h2>
+<p class="text-[10px] text-outline uppercase tracking-tighter">Your Studio</p>
+</div>
+<nav class="flex flex-col gap-1 px-4">
+<a class="text-white/60 hover:text-white px-4 py-3 flex items-center gap-3 transition-all duration-200 hover:bg-white/5 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-secondary">library_music</span>
+<span class="font-space-grotesk font-bold uppercase tracking-widest text-xs">Library</span>
+</a>
+<!-- Active Tab: Favorites -->
+<a class="text-[#00e3fd] bg-[#BF5AF2]/10 rounded-lg px-4 py-3 flex items-center gap-3 border-l-2 border-[#00e3fd]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-space-grotesk font-bold uppercase tracking-widest text-xs">Favorites</span>
+</a>
+<a class="text-white/60 hover:text-white px-4 py-3 flex items-center gap-3 transition-all duration-200 hover:bg-white/5 rounded-lg group" href="#">
+<span class="material-symbols-outlined group-hover:text-secondary">explore</span>
+<span class="font-space-grotesk font-bold uppercase tracking-widest text-xs">Browse</span>
+</a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full py-4 bg-surface-container-highest border border-white/10 rounded-xl flex items-center justify-center gap-2 hover:bg-surface-bright transition-all group">
+<span class="material-symbols-outlined text-secondary group-hover:rotate-90 transition-transform">add</span>
+<span class="font-space-grotesk font-bold uppercase tracking-widest text-[10px]">New Practice Session</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-8 bg-background">
+<!-- Header Section -->
+<header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<span class="text-tertiary font-label text-xs tracking-[0.2em] uppercase mb-2 block">Curated Collection</span>
+<h1 class="text-5xl md:text-7xl font-headline font-bold tracking-tighter text-on-surface">Your <span class="text-primary italic">Favorites</span></h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-container p-1 rounded-lg">
+<button class="p-2 bg-surface-container-highest text-secondary rounded-md shadow-inner">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">list</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Favorites Bento Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Song Card 1 -->
+<div class="group relative bg-surface-container hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden p-4 flex flex-col gap-4">
+<div class="aspect-square relative overflow-hidden rounded-lg shadow-2xl">
+<img alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Abstract vibrant digital art with purple and blue neon waves flowing through a dark void, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaLve9a_WAR9B-8IVC3z5bkGH0gjKkX60v4wixQTMgoiebFEH1sw-PZKYe5IUOPYzbZVrAIIDZflK_r1-Z02dKtf-_ZwUHfXeUvXYwixVIaRAjJYhZaEo3Bi9wgFokvI66KUViTj2Vsbru344-ivonXYWDB5d7ZfTQ2ZS5HzTFy9BFGVRCjEIXSMUeKyDSWOTl7mBgVxHx-AwKMGIYDwj2A4JozIXetZyF8ncSF2GonBmOsVS132iql7NTX7jSCiDqovzQexul3rE"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="w-14 h-14 bg-primary text-on-primary-fixed rounded-full flex items-center justify-center shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<span class="material-symbols-outlined text-tertiary drop-shadow-md" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight group-hover:text-primary transition-colors">Electric Dreams</h3>
+<p class="text-outline text-sm font-label mt-1">Neon Syndicate</p>
+</div>
+<span class="text-tertiary font-label text-[10px] tracking-widest mt-1">04:22</span>
+</div>
+</div>
+<!-- Song Card 2 -->
+<div class="group relative bg-surface-container hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden p-4 flex flex-col gap-4">
+<div class="aspect-square relative overflow-hidden rounded-lg shadow-2xl">
+<img alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close-up of a professional mixing console in a dimly lit studio with colorful glowing LEDs and knobs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnB_G5hVJQsu_4qIXym-BgzxXoVahxPruotwj7_Zx1P3GwDoDiIVn4QPwt8EYLOO9Aw9Fo9jrs-H9F3cL0ZWLFXZ9pPcol5Yc4y5-Er53JJP_ssWm1TYu0_-NnpqcafagNaJoijlFlBH3eEMHioJnOZZdR-OImqpqAkcaaizUwQrhdipMii_RU1VCrfsTQRDOr4LuUPydiSwerrl9cx5GdtNvUK-82fQqKrcshRYbnEvnT5gBtAeGuuqb0oaeGr2yINkOb11qHnS4"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="w-14 h-14 bg-primary text-on-primary-fixed rounded-full flex items-center justify-center shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<span class="material-symbols-outlined text-tertiary drop-shadow-md" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight group-hover:text-primary transition-colors">Studio Sessions</h3>
+<p class="text-outline text-sm font-label mt-1">The Pulse Collective</p>
+</div>
+<span class="text-tertiary font-label text-[10px] tracking-widest mt-1">03:45</span>
+</div>
+</div>
+<!-- Song Card 3 -->
+<div class="group relative bg-surface-container hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden p-4 flex flex-col gap-4">
+<div class="aspect-square relative overflow-hidden rounded-lg shadow-2xl">
+<img alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Silhouettes of a crowd at a concert with bright cyan and pink stage lights creating a hazy atmospheric glow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUoi15KKw_lFwr4wGRv7GlDvkWKOMmr_qdEpfBHmoMf7IfWm0fmQeNPMMrxUldgGABctwU6GEmO3VoVnVoPXtOvuwELzUnXlJ-AmqMO03BoZ9ljIy6oz5MJubMj1K_8KlYeNcBRRJyt5sPReGpVTa24nkoxKMEJ3-gqlOowMMr25_st5mAutOOLAOd5ClRtfFGggBr8Lo3PALrlvwV4CuLet38emgmT-DIOLFZcSuV2USindPH644YTyTqJsteVKjPjTm2smX84rU"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="w-14 h-14 bg-primary text-on-primary-fixed rounded-full flex items-center justify-center shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<span class="material-symbols-outlined text-tertiary drop-shadow-md" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight group-hover:text-primary transition-colors">Midnight Rush</h3>
+<p class="text-outline text-sm font-label mt-1">Solar Drift</p>
+</div>
+<span class="text-tertiary font-label text-[10px] tracking-widest mt-1">05:10</span>
+</div>
+</div>
+<!-- Song Card 4 -->
+<div class="group relative bg-surface-container hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden p-4 flex flex-col gap-4">
+<div class="aspect-square relative overflow-hidden rounded-lg shadow-2xl">
+<img alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Macro shot of guitar strings vibrating with warm golden light reflecting off the metal coils, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDv6uGG-TGkZG9Ivvf_IlaEQVDUC9H8FCQ-NXNL10RxjHCL2hoeDCrlnveqRaHNGH4xp-87PsDifQKfrJju3BKLYbm--sZeRkVq5B64TLjZtY8R7zh4PyQfHeQArIFw-d-Nq81StCNKn8PzbW0QRikl4ZbwDF2s15Lr77ZLpMZMuYqMALdVxOF-lm3jDE2pNLIqz5Exsk07_9mGfJ3HZ5jj6-m1Y0al0juUHW305ahjkoZgAP7-W8OHsP6yKTCakvA_5fK0dlOea3E"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="w-14 h-14 bg-primary text-on-primary-fixed rounded-full flex items-center justify-center shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<span class="material-symbols-outlined text-tertiary drop-shadow-md" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight group-hover:text-primary transition-colors">Acoustic Flux</h3>
+<p class="text-outline text-sm font-label mt-1">Ethereal Bloom</p>
+</div>
+<span class="text-tertiary font-label text-[10px] tracking-widest mt-1">04:01</span>
+</div>
+</div>
+<!-- Repeat Pattern for more items to show grid depth -->
+<div class="group relative bg-surface-container hover:bg-surface-container-high transition-all duration-500 rounded-xl overflow-hidden p-4 flex flex-col gap-4">
+<div class="aspect-square relative overflow-hidden rounded-lg shadow-2xl">
+<img alt="Album Art" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Dynamic geometric patterns with glowing cyan lines and dark textured surfaces, futuristic technical aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLQPIqm5b7UrrICppi3xT9257rw3WJZLTa0wV3sdDBRLJLEjdvPDJvGmUe89v3axSk2xQ_MVrvVdSGemCg6byqa8uN6bwiFJonnzU3SaAbHu2V5_IqNeBQJIVc8etaQWXUYAik0GR5aFyQjW16EDZmYVR1CvyOkfy52-pkGlIfoyyZ1s3JCgz7egGtDgaDio71FvnnyITtRRIULGfGQ-FqXzankYTe2l2_VMhZ0THxrE_f6hUjyj1TDclugrvWvZRzLcgSP2eh5II"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+<button class="w-14 h-14 bg-primary text-on-primary-fixed rounded-full flex items-center justify-center shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<div class="absolute top-3 right-3 z-10">
+<span class="material-symbols-outlined text-tertiary drop-shadow-md" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline font-bold text-lg leading-tight group-hover:text-primary transition-colors">Digital Horizon</h3>
+<p class="text-outline text-sm font-label mt-1">Cyber Core</p>
+</div>
+<span class="text-tertiary font-label text-[10px] tracking-widest mt-1">03:15</span>
+</div>
+</div>
+<!-- Empty State/Add Favorite Bento Element -->
+<div class="group bg-surface-container-low border border-dashed border-outline-variant/30 hover:border-primary/50 transition-all rounded-xl p-4 flex flex-col items-center justify-center gap-4 text-center cursor-pointer min-h-[300px]">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-outline group-hover:text-primary group-hover:scale-110 transition-all">
+<span class="material-symbols-outlined text-4xl">add</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Discover More</h4>
+<p class="text-outline text-xs mt-2 max-w-[150px]">Add new tracks to your favorites from the explore page.</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer Execution -->
+<footer class="flex justify-between items-center px-8 w-full bg-surface-dim py-6 mt-auto border-t border-white/5">
+<div class="flex items-center gap-4">
+<span class="text-sm font-black text-[#BF5AF2] font-headline">SonicPulse</span>
+<span class="text-white/40 font-manrope text-xs tracking-tight">© 2024 SonicPulse UI. The Electric Pulse System.</span>
+</div>
+<div class="flex items-center gap-8">
+<a class="text-white/40 font-manrope text-xs tracking-tight hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+<a class="text-white/40 font-manrope text-xs tracking-tight hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="text-white/40 font-manrope text-xs tracking-tight hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+</div>
+</footer>
+<!-- Mobile Navigation (Responsive Pivot) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-high/90 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50">
+<button class="flex flex-col items-center gap-1 text-outline">
+<span class="material-symbols-outlined">library_music</span>
+<span class="text-[10px] font-label">Library</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-[10px] font-label">Favorites</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-outline">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] font-label">Browse</span>
+</button>
+</nav>
+</body></html>

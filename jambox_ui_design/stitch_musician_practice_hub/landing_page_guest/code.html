@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SonicPulse - Master Your Music</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#a1fe00",
+                        "on-tertiary": "#3e6600",
+                        "outline-variant": "#48474a",
+                        "error-dim": "#d73357",
+                        "on-error-container": "#ffb2b9",
+                        "on-primary-fixed-variant": "#4a006b",
+                        "primary-container": "#d37bff",
+                        "inverse-primary": "#9027c4",
+                        "primary-fixed": "#d37bff",
+                        "surface-variant": "#262528",
+                        "error": "#ff6e84",
+                        "primary-fixed-dim": "#cb66fe",
+                        "primary": "#db90ff",
+                        "primary-dim": "#d277ff",
+                        "secondary-fixed": "#26e6ff",
+                        "surface": "#0e0e10",
+                        "inverse-surface": "#fcf8fb",
+                        "on-primary-container": "#3c0057",
+                        "on-surface-variant": "#acaaad",
+                        "secondary-container": "#006875",
+                        "on-secondary-container": "#e8fbff",
+                        "tertiary-container": "#a1fe00",
+                        "inverse-on-surface": "#555557",
+                        "on-surface": "#f6f3f5",
+                        "on-tertiary-fixed": "#2b4900",
+                        "surface-container-highest": "#262528",
+                        "surface-bright": "#2c2c2f",
+                        "on-background": "#f6f3f5",
+                        "background": "#0e0e10",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed": "#000000",
+                        "surface-container": "#19191c",
+                        "outline": "#767577",
+                        "on-error": "#490013",
+                        "secondary-fixed-dim": "#00d7f0",
+                        "on-secondary": "#004d57",
+                        "on-tertiary-container": "#385d00",
+                        "tertiary": "#ddffb0",
+                        "tertiary-dim": "#97ee00",
+                        "secondary": "#00e3fd",
+                        "on-tertiary-fixed-variant": "#3f6800",
+                        "error-container": "#a70138",
+                        "surface-container-low": "#131315",
+                        "on-secondary-fixed-variant": "#005964",
+                        "secondary-dim": "#00d4ec",
+                        "surface-container-high": "#1f1f22",
+                        "surface-tint": "#db90ff",
+                        "tertiary-fixed-dim": "#97ee00",
+                        "on-secondary-fixed": "#003a42",
+                        "on-primary": "#4e0070",
+                        "surface-dim": "#0e0e10"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #0e0e10;
+            color: #f6f3f5;
+        }
+        .glass-panel {
+            background: rgba(44, 44, 47, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="selection:bg-primary selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-50 bg-surface-dim/80 backdrop-blur-xl h-16 shadow-[0_0_40px_rgba(191,90,242,0.08)]">
+<div class="text-2xl font-bold tracking-tighter text-[#BF5AF2] dark:text-[#db90ff] font-headline">
+            SonicPulse
+        </div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-[#db90ff] font-bold border-b-2 border-[#db90ff] pb-1 font-label text-sm uppercase tracking-widest" href="#">Browse</a>
+<a class="text-[#48474a] font-medium hover:text-[#00e3fd] transition-colors duration-300 font-label text-sm uppercase tracking-widest" href="#">Library</a>
+<a class="text-[#48474a] font-medium hover:text-[#00e3fd] transition-colors duration-300 font-label text-sm uppercase tracking-widest" href="#">Favorites</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="text-[#BF5AF2] scale-95 active:scale-90 transition-transform flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed px-6 py-2 rounded-full font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(219,144,255,0.4)] active:scale-95">
+                Sign In
+            </button>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative pt-24 pb-32 px-8 overflow-hidden">
+<div class="absolute top-0 right-0 w-2/3 h-full bg-[radial-gradient(circle_at_50%_50%,rgba(191,90,242,0.12),transparent_70%)] pointer-events-none"></div>
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="z-10">
+<div class="inline-block bg-surface-container-high px-4 py-1.5 rounded-full mb-6 border border-outline-variant/20">
+<span class="text-tertiary text-xs font-bold tracking-[0.2em] font-label uppercase">Engineered for Excellence</span>
+</div>
+<h1 class="font-headline text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9] mb-8 text-on-background">
+                        Your Ultimate <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-tertiary">Practice Session</span> Starts Here.
+                    </h1>
+<p class="text-on-surface-variant text-xl max-w-lg mb-10 leading-relaxed">
+                        Transform any YouTube URL into your personal studio. Isolate vocals, bass, drums, and piano with professional-grade AI stem separation.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="flex items-center justify-center gap-3 bg-on-background text-background px-8 py-4 rounded-full font-extrabold text-lg transition-transform hover:scale-105 active:scale-95">
+<img alt="Google Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG1yisdTj21r6oKgvrMpTyPJRs9BiKrRM34KB10296mmy3JWPYPNvIjXBi1be5p_zRMlaEvHYvgG2If_HcUOueuYm1oMg5VCOpOqdCsSn4YCHViu0HPt6bvom4vRMN8lhGYungzT8htNjJ1wL4wsXhHUSByAbQEb6JNszMpE4x2rTBRSg7VyZ67sp4b4MxFhAWZi4HSi8YsUCk9PLC0UOejX60Os2RN6sKFqUg80nAMs9iUKWKTmwLml4bNi0RvOJoKQxuQUPX-sg"/>
+                            Get Started with Google
+                        </button>
+<button class="flex items-center justify-center gap-2 border border-outline-variant text-on-surface px-8 py-4 rounded-full font-bold hover:bg-surface-container-high transition-colors">
+                            How it works
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Player Interface Preview -->
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+<div class="relative bg-surface-container rounded-2xl overflow-hidden shadow-2xl border border-white/5">
+<!-- Preview Header -->
+<div class="p-6 bg-surface-container-high flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container-lowest rounded overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="album artwork of a neon electric guitar glowing in a dark recording studio atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAi4plDadYMEjLKNXqTYp8guXD5hKPk6QUsVmhZSwhvGOXZToTWTc835m0KEQO_4oY-KC9UgziquxCcfiQ9p1HPyU67E3-la8sRtnCKYI5CNMosvFhan6z2vM2P8UlKPEyuY8vURgt-yOIiSFTv7ktkywNE6eBFbQPwewfFoXayL1_pE20MCiNgJjR0I8QhogVEv7AKFJNoYtQcoJHZBwVpyGyCGHLf6UjBjzXh19p1UabIb9XzNz4oiVnSv3U3_rx-rmhN4QSU8vY"/>
+</div>
+<div>
+<h3 class="font-bold font-headline text-lg leading-none">Midnight Circuit</h3>
+<p class="text-on-surface-variant text-xs mt-1">Stems Extraction Active • 124 BPM</p>
+</div>
+</div>
+<div class="flex gap-2">
+<div class="bg-surface-container-lowest p-2 rounded-lg">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="equalizer">equalizer</span>
+</div>
+</div>
+</div>
+<!-- Waveform Mixer Area -->
+<div class="p-6 space-y-6 bg-surface-container-low">
+<!-- Stem Track: Drums -->
+<div class="space-y-2">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-black tracking-widest text-tertiary uppercase">Drums</span>
+<div class="flex gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant hover:text-primary cursor-pointer">SOLO</span>
+<span class="text-[10px] font-bold text-error cursor-pointer">MUTE</span>
+</div>
+</div>
+<div class="h-12 bg-surface-container-lowest rounded-md flex items-center px-4 relative overflow-hidden">
+<div class="flex gap-0.5 items-end h-8 w-full opacity-60">
+<div class="bg-secondary w-1 h-[40%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[60%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[90%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[50%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[80%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[30%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[70%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[100%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[40%] rounded-full"></div>
+<div class="bg-secondary w-1 h-[60%] rounded-full"></div>
+</div>
+<div class="absolute inset-y-0 left-0 w-1/3 bg-secondary/10 border-r border-secondary"></div>
+</div>
+</div>
+<!-- Stem Track: Bass -->
+<div class="space-y-2">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-black tracking-widest text-primary uppercase">Bass</span>
+<div class="flex gap-3">
+<span class="text-[10px] font-bold text-primary cursor-pointer">SOLO</span>
+<span class="text-[10px] font-bold text-on-surface-variant cursor-pointer">MUTE</span>
+</div>
+</div>
+<div class="h-12 bg-surface-container-lowest rounded-md flex items-center px-4 relative overflow-hidden">
+<div class="flex gap-0.5 items-end h-8 w-full opacity-60">
+<div class="bg-primary w-1 h-[70%] rounded-full"></div>
+<div class="bg-primary w-1 h-[50%] rounded-full"></div>
+<div class="bg-primary w-1 h-[80%] rounded-full"></div>
+<div class="bg-primary w-1 h-[60%] rounded-full"></div>
+<div class="bg-primary w-1 h-[30%] rounded-full"></div>
+<div class="bg-primary w-1 h-[90%] rounded-full"></div>
+<div class="bg-primary w-1 h-[40%] rounded-full"></div>
+<div class="bg-primary w-1 h-[60%] rounded-full"></div>
+<div class="bg-primary w-1 h-[70%] rounded-full"></div>
+<div class="bg-primary w-1 h-[50%] rounded-full"></div>
+</div>
+<div class="absolute inset-y-0 left-0 w-1/3 bg-primary/20 border-r border-primary"></div>
+</div>
+</div>
+<!-- Stem Track: Vocals -->
+<div class="space-y-2">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-black tracking-widest text-on-surface-variant uppercase">Vocals</span>
+<div class="flex gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant cursor-pointer">SOLO</span>
+<span class="text-[10px] font-bold text-error cursor-pointer">MUTE</span>
+</div>
+</div>
+<div class="h-12 bg-surface-container-lowest rounded-md flex items-center px-4 relative overflow-hidden opacity-30">
+<div class="flex gap-0.5 items-end h-8 w-full">
+<div class="bg-outline w-1 h-[40%] rounded-full"></div>
+<div class="bg-outline w-1 h-[60%] rounded-full"></div>
+<div class="bg-outline w-1 h-[30%] rounded-full"></div>
+<div class="bg-outline w-1 h-[80%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Transport Controls -->
+<div class="p-6 bg-surface-container-highest flex justify-center items-center gap-10">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-white" data-icon="replay_10">replay_10</span>
+<div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center text-on-primary-fixed shadow-lg shadow-primary/20 cursor-pointer">
+<span class="material-symbols-outlined font-variation-settings: 'FILL' 1;" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-white" data-icon="forward_10">forward_10</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="py-24 px-8 bg-surface-container-low">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+<div class="max-w-xl">
+<h2 class="font-headline text-5xl font-bold tracking-tighter mb-4 text-on-background">Precision Tools for Creative Minds.</h2>
+<p class="text-on-surface-variant text-lg">Every feature is designed to bridge the gap between inspiration and performance.</p>
+</div>
+<div class="flex gap-4">
+<div class="p-4 bg-surface-container rounded-xl border border-white/5">
+<p class="text-primary font-bold text-2xl font-headline">99.8%</p>
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Separation Accuracy</p>
+</div>
+<div class="p-4 bg-surface-container rounded-xl border border-white/5">
+<p class="text-secondary font-bold text-2xl font-headline">&lt;15s</p>
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Processing Time</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[280px]">
+<!-- Feature 1: YouTube Integration -->
+<div class="md:col-span-8 bg-surface-container rounded-2xl p-8 relative overflow-hidden group border border-white/5">
+<div class="relative z-10 h-full flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-red-500 mb-4" data-icon="smart_display">smart_display</span>
+<h3 class="font-headline text-3xl font-bold mb-3">Instant URL Import</h3>
+<p class="text-on-surface-variant max-w-sm">Just paste any YouTube link. Our engine handles the audio extraction and stem separation automatically in the cloud.</p>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest p-3 rounded-full w-fit">
+<div class="bg-surface-container-high px-4 py-1 rounded-full text-xs font-bold text-on-surface-variant">https://youtube.com/watch?v=...</div>
+<div class="bg-primary text-on-primary-fixed p-2 rounded-full">
+<span class="material-symbols-outlined text-sm" data-icon="content_paste">content_paste</span>
+</div>
+</div>
+</div>
+<div class="absolute right-0 bottom-0 w-1/2 h-full opacity-10 group-hover:opacity-20 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="close up of digital recording software interface with glowing red and purple audio levels" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUxfUdfWAir1cCdJB_tL-XF4Dv_a7jHwdp4Jo5njwVWTLNRfA8Nt3M_qpb0RE7IoUhgtKzeEiKyu-eDffNfFZpweDZGeWvXsnx2_QNpojhVy6K2yh43SBUSl14Wtdi48RODBKe42N8TixQ5sC6iphrC1fdV_1zdE7EG8lpqwZ8MFeZY1m6eTtSSXnUNomaBpzEFg_HcKqVTe2fenDw5p9Va25wYHBA2Xzyg7cZc0C-jt0Id8vbE2uszj0RHJ55G0-_af-Ro8HLDzg"/>
+</div>
+</div>
+<!-- Feature 2: Loops -->
+<div class="md:col-span-4 bg-surface-container-high rounded-2xl p-8 border border-white/5">
+<span class="material-symbols-outlined text-secondary mb-4" data-icon="loop">loop</span>
+<h3 class="font-headline text-3xl font-bold mb-3">Smart Looping</h3>
+<p class="text-on-surface-variant">Set precise loop points down to the millisecond. Master that difficult solo by playing it on repeat at your own pace.</p>
+</div>
+<!-- Feature 3: Pitch -->
+<div class="md:col-span-4 bg-surface-container-highest rounded-2xl p-8 border border-white/5 group">
+<span class="material-symbols-outlined text-tertiary mb-4" data-icon="height">height</span>
+<h3 class="font-headline text-3xl font-bold mb-3">Pitch &amp; Tempo</h3>
+<p class="text-on-surface-variant">Change the key without affecting speed, or slow down to 25% without losing audio quality.</p>
+</div>
+<!-- Feature 4: Cloud Sync -->
+<div class="md:col-span-8 bg-gradient-to-br from-surface-container to-surface-container-low rounded-2xl p-8 flex flex-col justify-between border border-white/5">
+<div class="flex justify-between items-start">
+<div>
+<span class="material-symbols-outlined text-primary mb-4" data-icon="cloud_done">cloud_done</span>
+<h3 class="font-headline text-3xl font-bold mb-3">Library Anywhere</h3>
+<p class="text-on-surface-variant max-w-md">Your processed songs are saved to your account. Access your practice library from any device, anytime.</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-xs">phone_iphone</span></div>
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-xs">laptop</span></div>
+</div>
+</div>
+<div class="mt-8 flex gap-2 overflow-hidden opacity-40">
+<div class="w-24 h-12 bg-surface-container-lowest rounded-full"></div>
+<div class="w-32 h-12 bg-primary rounded-full"></div>
+<div class="w-24 h-12 bg-surface-container-lowest rounded-full"></div>
+<div class="w-48 h-12 bg-secondary rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-32 px-8 relative overflow-hidden">
+<div class="absolute inset-0 bg-surface-dim pointer-events-none"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<h2 class="font-headline text-6xl md:text-7xl font-bold tracking-tighter mb-8 text-on-background">Ready to level up your <span class="italic text-tertiary">sound?</span></h2>
+<p class="text-on-surface-variant text-xl mb-12 max-w-2xl mx-auto">Join 50,000+ musicians using SonicPulse to master their repertoire faster than ever before.</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center">
+<button class="bg-primary text-on-primary-fixed px-10 py-5 rounded-full font-black text-xl shadow-[0_0_40px_rgba(219,144,255,0.3)] hover:scale-105 active:scale-95 transition-all">
+                        Create Your First Session
+                    </button>
+<button class="bg-surface-container-high border border-outline-variant/30 text-on-surface px-10 py-5 rounded-full font-bold text-xl hover:bg-surface-container-highest transition-colors">
+                        View Demo
+                    </button>
+</div>
+</div>
+<!-- Background Decorative Elements -->
+<div class="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute -top-24 -right-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] pointer-events-none"></div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-dim py-12 border-t border-white/5 px-8">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
+<div>
+<div class="text-xl font-black text-[#BF5AF2] font-headline mb-2">SonicPulse</div>
+<p class="text-on-surface-variant text-sm max-w-xs font-label">The electric pulse system for the modern musician. Powered by cutting-edge neural audio separation.</p>
+</div>
+<div class="flex gap-12">
+<div class="flex flex-col gap-4">
+<span class="text-[10px] font-black uppercase tracking-widest text-primary">Product</span>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Features</a>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Pricing</a>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Mobile App</a>
+</div>
+<div class="flex flex-col gap-4">
+<span class="text-[10px] font-black uppercase tracking-widest text-primary">Legal</span>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Terms</a>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Privacy</a>
+<a class="text-xs text-on-surface-variant hover:text-secondary transition-colors font-label" href="#">Cookies</a>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
+<p class="text-[10px] font-manrope tracking-tight text-white/40">© 2024 SonicPulse UI. The Electric Pulse System.</p>
+<div class="flex gap-6">
+<a class="material-symbols-outlined text-white/40 hover:text-secondary transition-colors" data-icon="brand_awareness" href="#">brand_awareness</a>
+<a class="material-symbols-outlined text-white/40 hover:text-secondary transition-colors" data-icon="graphic_eq" href="#">graphic_eq</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

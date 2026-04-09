@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#a1fe00",
+                    "on-tertiary": "#3e6600",
+                    "outline-variant": "#48474a",
+                    "error-dim": "#d73357",
+                    "on-error-container": "#ffb2b9",
+                    "on-primary-fixed-variant": "#4a006b",
+                    "primary-container": "#d37bff",
+                    "inverse-primary": "#9027c4",
+                    "primary-fixed": "#d37bff",
+                    "surface-variant": "#262528",
+                    "error": "#ff6e84",
+                    "primary-fixed-dim": "#cb66fe",
+                    "primary": "#db90ff",
+                    "primary-dim": "#d277ff",
+                    "secondary-fixed": "#26e6ff",
+                    "surface": "#0e0e10",
+                    "inverse-surface": "#fcf8fb",
+                    "on-primary-container": "#3c0057",
+                    "on-surface-variant": "#acaaad",
+                    "secondary-container": "#006875",
+                    "on-secondary-container": "#e8fbff",
+                    "tertiary-container": "#a1fe00",
+                    "inverse-on-surface": "#555557",
+                    "on-surface": "#f6f3f5",
+                    "on-tertiary-fixed": "#2b4900",
+                    "surface-container-highest": "#262528",
+                    "surface-bright": "#2c2c2f",
+                    "on-background": "#f6f3f5",
+                    "background": "#0e0e10",
+                    "surface-container-lowest": "#000000",
+                    "on-primary-fixed": "#000000",
+                    "surface-container": "#19191c",
+                    "outline": "#767577",
+                    "on-error": "#490013",
+                    "secondary-fixed-dim": "#00d7f0",
+                    "on-secondary": "#004d57",
+                    "on-tertiary-container": "#385d00",
+                    "tertiary": "#ddffb0",
+                    "tertiary-dim": "#97ee00",
+                    "secondary": "#00e3fd",
+                    "on-tertiary-fixed-variant": "#3f6800",
+                    "error-container": "#a70138",
+                    "surface-container-low": "#131315",
+                    "on-secondary-fixed-variant": "#005964",
+                    "secondary-dim": "#00d4ec",
+                    "surface-container-high": "#1f1f22",
+                    "surface-tint": "#db90ff",
+                    "tertiary-fixed-dim": "#97ee00",
+                    "on-secondary-fixed": "#003a42",
+                    "on-primary": "#4e0070",
+                    "surface-dim": "#0e0e10"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .waveform-bar {
+            width: 2px;
+            border-radius: 1px;
+            background: currentColor;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #262528;
+            border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: #f6f3f5;
+            cursor: pointer;
+            margin-top: -4px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-50 bg-surface-dim/80 backdrop-blur-xl h-16 border-b border-white/5 shadow-[0_0_40px_rgba(191,90,242,0.08)]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-[#BF5AF2] dark:text-[#db90ff] font-headline">SonicPulse</span>
+<nav class="hidden md:flex gap-6 items-center h-full">
+<a class="text-[#48474a] font-medium font-label text-sm hover:text-[#00e3fd] transition-colors duration-300" href="#">Library</a>
+<a class="text-[#48474a] font-medium font-label text-sm hover:text-[#00e3fd] transition-colors duration-300" href="#">Favorites</a>
+<a class="text-[#db90ff] font-bold border-b-2 border-[#db90ff] pb-1 font-label text-sm" href="#">Browse</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-secondary w-64 transition-all" placeholder="Search tracks..." type="text"/>
+</div>
+<button class="scale-95 active:scale-90 transition-transform text-[#BF5AF2]">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<button class="bg-primary text-on-primary-fixed px-6 py-1.5 rounded-full font-bold text-sm scale-95 active:scale-90 transition-transform">Sign In</button>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px-64px)]">
+<!-- SideNavBar -->
+<aside class="h-full w-64 sticky top-16 hidden lg:flex flex-col py-8 gap-6 bg-[#131315] dark:bg-[#131315] border-r border-white/5">
+<div class="px-6">
+<h3 class="font-headline font-bold uppercase tracking-widest text-xs text-primary">Navigation</h3>
+<p class="text-on-surface-variant text-xs mt-1">Your Studio</p>
+</div>
+<nav class="flex flex-col gap-2 px-2">
+<a class="text-white/60 hover:text-white px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="font-headline font-bold uppercase tracking-widest text-xs">Library</span>
+</a>
+<a class="text-white/60 hover:text-white px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-headline font-bold uppercase tracking-widest text-xs">Favorites</span>
+</a>
+<a class="text-[#00e3fd] bg-[#BF5AF2]/10 rounded-lg px-4 py-3 flex items-center gap-3 hover:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-headline font-bold uppercase tracking-widest text-xs">Browse</span>
+</a>
+</nav>
+<div class="mt-auto px-4">
+<button class="w-full bg-surface-container-highest text-secondary border border-secondary/20 py-3 rounded-lg font-headline font-bold uppercase tracking-widest text-xs hover:bg-secondary/10 transition-colors">
+                    New Practice Session
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center py-12 px-8 overflow-y-auto">
+<!-- Hero Audio Player Section -->
+<section class="w-full max-w-4xl flex flex-col items-center">
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary/20 blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+<img alt="Cyberpunk Album Art" class="w-72 h-72 object-cover rounded-xl shadow-2xl relative z-10 border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtLinePsMwxdqX6_ly-Kn2R57wHXVp0oO3k3bEUqLJ34-KKsFOU3hk_1pXX4sBEPugVPnjGBCwmTPZUoqyfuOXg2sQJ422rNe0m-AmwS_tJBdv1CUsdwB8ZU_kOagUTr2s7vC01AUPDv4usxO5BGgHn15H_qF-MyHKzbV3dhbwJKIqfOUi1j-YfBYRYT4b-SEv9bYJDhr1cBziDPvf9d6SBf9WAlZ9eKj31H4qgJ2_ErjkeYiuf3Z19ZAFfS6GU6x8iZFHEYCsOM0"/>
+<button class="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-md p-2 rounded-full text-secondary hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+</div>
+<div class="mt-8 text-center space-y-2">
+<h1 class="text-4xl font-headline font-extrabold tracking-tighter text-on-surface">NEON DRIFT</h1>
+<p class="text-secondary font-label uppercase tracking-widest text-xs">Synthetic Dreams • Audio Stem Project</p>
+</div>
+<!-- Playback Controls -->
+<div class="mt-8 flex items-center gap-10">
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-2xl">repeat</span>
+</button>
+<button class="text-on-surface hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">skip_previous</span>
+</button>
+<button class="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center text-on-primary-fixed shadow-[0_0_30px_rgba(219,144,255,0.4)] hover:shadow-[0_0_50px_rgba(219,144,255,0.6)] transition-all transform active:scale-90">
+<span class="material-symbols-outlined text-4xl">play_arrow</span>
+</button>
+<button class="text-on-surface hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">skip_next</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">shuffle</span>
+</button>
+</div>
+<!-- Global Progress -->
+<div class="w-full mt-8 flex items-center gap-4">
+<span class="text-xs font-label text-tertiary">02:45</span>
+<div class="flex-1 h-1.5 bg-surface-container-highest rounded-full overflow-hidden relative cursor-pointer group">
+<div class="absolute left-0 top-0 h-full w-[65%] bg-gradient-to-r from-secondary to-primary rounded-full"></div>
+<div class="absolute left-[65%] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="text-xs font-label text-outline">04:12</span>
+</div>
+</section>
+<!-- Mixer Section -->
+<section class="w-full max-w-6xl mt-16 pt-12 border-t border-white/5">
+<div class="flex justify-between items-end mb-8 px-4">
+<div>
+<h2 class="text-2xl font-headline font-bold tracking-tight text-on-surface uppercase">Stem Mixer</h2>
+<p class="text-outline text-xs font-label">Parallel processing and stem isolation</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded-lg bg-surface-container-high border border-outline-variant/20 text-on-surface-variant hover:text-on-surface font-label text-[10px] uppercase tracking-widest transition-all">Reset</button>
+<button class="px-4 py-2 rounded-lg bg-tertiary text-on-tertiary font-label text-[10px] font-bold uppercase tracking-widest shadow-[0_0_20px_rgba(161,254,0,0.2)]">Render Mix</button>
+</div>
+</div>
+<!-- Vertical Stacks Mixer -->
+<div class="relative space-y-4 px-4 pb-12">
+<!-- Playhead (Global Indicator) -->
+<div class="absolute left-[340px] top-0 bottom-0 w-[2px] bg-white/40 shadow-[0_0_10px_rgba(255,255,255,0.5)] z-20 pointer-events-none">
+<div class="absolute -top-1 -left-1 w-3 h-3 bg-white rotate-45"></div>
+</div>
+<!-- Stem Row: Vocals -->
+<div class="bg-surface-container-low/50 rounded-xl p-4 flex items-center gap-6 border border-white/5 hover:bg-surface-container-low transition-colors group">
+<div class="w-48 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-headline font-bold text-primary uppercase tracking-widest">Vocals</span>
+<div class="flex gap-1">
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-red-500/20 hover:text-red-400 transition-colors">M</button>
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-yellow-500/20 hover:text-yellow-400 transition-colors">S</button>
+</div>
+</div>
+<input class="w-full h-1" max="100" min="0" type="range" value="80"/>
+</div>
+<div class="flex-1 h-12 flex items-center gap-1 text-primary/40 relative">
+<!-- Horizontal Waveform Simulation -->
+<div class="absolute inset-0 flex items-center gap-[3px] opacity-20">
+<div class="waveform-bar h-2"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div>
+</div>
+<div class="absolute inset-0 flex items-center gap-[3px] clip-path-progess overflow-hidden w-[65%] text-primary">
+<div class="waveform-bar h-2"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-2"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div>
+</div>
+</div>
+</div>
+<!-- Stem Row: Drums -->
+<div class="bg-surface-container-low/50 rounded-xl p-4 flex items-center gap-6 border border-white/5 hover:bg-surface-container-low transition-colors group">
+<div class="w-48 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-headline font-bold text-secondary uppercase tracking-widest">Drums</span>
+<div class="flex gap-1">
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-red-500/20 hover:text-red-400">M</button>
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-yellow-500/20 hover:text-yellow-400">S</button>
+</div>
+</div>
+<input class="w-full h-1" max="100" min="0" type="range" value="45"/>
+</div>
+<div class="flex-1 h-12 flex items-center gap-1 text-secondary/40 relative">
+<div class="absolute inset-0 flex items-center gap-[3px] opacity-20">
+<div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div>
+</div>
+<div class="absolute inset-0 flex items-center gap-[3px] overflow-hidden w-[65%] text-secondary">
+<div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-12"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-4"></div>
+</div>
+</div>
+</div>
+<!-- Stem Row: Bass -->
+<div class="bg-surface-container-low/50 rounded-xl p-4 flex items-center gap-6 border border-white/5 hover:bg-surface-container-low transition-colors group">
+<div class="w-48 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-headline font-bold text-tertiary uppercase tracking-widest">Bass</span>
+<div class="flex gap-1">
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-red-500/20 hover:text-red-400">M</button>
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-yellow-500/20 hover:text-yellow-400">S</button>
+</div>
+</div>
+<input class="w-full h-1" max="100" min="0" type="range" value="60"/>
+</div>
+<div class="flex-1 h-12 flex items-center gap-1 text-tertiary/40 relative">
+<div class="absolute inset-0 flex items-center gap-[3px] opacity-20">
+<div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div>
+</div>
+<div class="absolute inset-0 flex items-center gap-[3px] overflow-hidden w-[65%] text-tertiary">
+<div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div>
+</div>
+</div>
+</div>
+<!-- Stem Row: Guitar -->
+<div class="bg-surface-container-low/50 rounded-xl p-4 flex items-center gap-6 border border-white/5 hover:bg-surface-container-low transition-colors group">
+<div class="w-48 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-headline font-bold text-on-primary-container bg-primary-container px-1 rounded uppercase tracking-widest">Guitar</span>
+<div class="flex gap-1">
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-red-500/20 hover:text-red-400">M</button>
+<button class="w-7 h-6 rounded bg-surface-container-highest text-[10px] font-bold text-on-surface-variant hover:bg-yellow-500/20 hover:text-yellow-400">S</button>
+</div>
+</div>
+<input class="w-full h-1" max="100" min="0" type="range" value="72"/>
+</div>
+<div class="flex-1 h-12 flex items-center gap-1 text-primary-container/40 relative">
+<div class="absolute inset-0 flex items-center gap-[3px] opacity-20">
+<div class="waveform-bar h-6"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div>
+</div>
+<div class="absolute inset-0 flex items-center gap-[3px] overflow-hidden w-[65%] text-primary-container">
+<div class="waveform-bar h-6"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-3"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-10"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div><div class="waveform-bar h-11"></div><div class="waveform-bar h-6"></div><div class="waveform-bar h-4"></div><div class="waveform-bar h-7"></div><div class="waveform-bar h-9"></div><div class="waveform-bar h-5"></div><div class="waveform-bar h-8"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-8 w-full bg-surface-dim h-16 mt-auto border-t border-white/5 py-6">
+<div class="flex items-center gap-2">
+<span class="text-sm font-black text-[#BF5AF2] font-headline">SonicPulse UI.</span>
+<span class="font-manrope text-xs tracking-tight text-white/40">© 2024 The Electric Pulse System.</span>
+</div>
+<div class="flex gap-6">
+<a class="font-manrope text-xs tracking-tight text-white/40 hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Support</a>
+<a class="font-manrope text-xs tracking-tight text-white/40 hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+<a class="font-manrope text-xs tracking-tight text-white/40 hover:text-[#00e3fd] transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+</div>
+</footer>
+</body></html>

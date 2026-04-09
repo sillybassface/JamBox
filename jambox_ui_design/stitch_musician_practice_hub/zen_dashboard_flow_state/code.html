@@ -1,0 +1,350 @@
+<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-surface text-on-surface min-h-screen selection:bg-primary-container">```html
+<meta charset="utf-8"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;800&amp;family=Plus+Jakarta+Sans:wght@300;400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-tertiary": "#ffffff",
+                "inverse-surface": "#0e0e0c",
+                "tertiary-dim": "#6b5443",
+                "tertiary": "#785f4e",
+                "on-surface": "#383833",
+                "primary-dim": "#505542",
+                "on-primary-fixed": "#3c4130",
+                "surface-dim": "#e4e3d9",
+                "surface": "#fffcf8",
+                "surface-container-high": "#f0eee6",
+                "primary": "#5c614d",
+                "tertiary-container": "#fddcc6",
+                "surface-container": "#f6f3ed",
+                "error": "#a54731",
+                "surface-variant": "#eae8e0",
+                "surface-container-lowest": "#ffffff",
+                "background": "#fffcf8",
+                "on-background": "#383833",
+                "on-primary": "#f6fae1",
+                "on-error": "#ffffff",
+                "primary-fixed": "#e0e5cc",
+                "error-dim": "#5c1202",
+                "on-secondary-container": "#52533f",
+                "secondary-container": "#e5e4ca",
+                "error-container": "#fe8b70",
+                "primary-container": "#e0e5cc",
+                "secondary-fixed": "#e5e4ca",
+                "surface-tint": "#5c614d",
+                "outline": "#81817a",
+                "secondary-dim": "#595a45",
+                "on-tertiary-fixed": "#503b2b",
+                "on-primary-fixed-variant": "#595e4b",
+                "inverse-on-surface": "#9e9d99",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed-dim": "#eeceb9",
+                "tertiary-fixed": "#fddcc6",
+                "on-surface-variant": "#64655e",
+                "outline-variant": "#bab9b2",
+                "surface-container-low": "#fcf9f4",
+                "surface-container-highest": "#eae8e0",
+                "on-secondary-fixed-variant": "#5c5d48",
+                "on-primary-container": "#4f5441",
+                "on-error-container": "#742410",
+                "on-tertiary-fixed-variant": "#6e5746",
+                "secondary": "#656651",
+                "secondary-fixed-dim": "#d6d6bc",
+                "inverse-primary": "#faffe5",
+                "on-secondary-fixed": "#40412e",
+                "on-tertiary-container": "#644d3d",
+                "surface-bright": "#fffcf8",
+                "primary-fixed-dim": "#d2d7bf"
+        },
+        "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+                "full": "9999px"
+        },
+        "fontFamily": {
+                "headline": ["Manrope"],
+                "body": ["Manrope"],
+                "label": ["Plus Jakarta Sans"]
+        }
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  body {
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .label-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+</style>
+<!-- Side Navigation Rail (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full py-8 bg-[#131315] text-[#e08dff] font-space-grotesk font-bold uppercase h-full w-64 fixed left-0 top-0 z-50">
+<div class="px-8 mb-12">
+<div class="text-[#e08dff] font-black text-xl tracking-tighter">STUDIO</div>
+<div class="text-[10px] tracking-[0.2em] opacity-60">MASTER CONSOLE</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-4 px-8 py-4 text-[#00eefc] border-l-4 border-[#00eefc] bg-[#262528] scale-102 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="library_music">library_music</span>
+<span class="text-sm tracking-widest">Library</span>
+</a>
+<a class="flex items-center gap-4 px-8 py-4 text-[#767577] hover:bg-[#262528] hover:text-[#e08dff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="text-sm tracking-widest">Favorites</span>
+</a>
+<a class="flex items-center gap-4 px-8 py-4 text-[#767577] hover:bg-[#262528] hover:text-[#e08dff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-sm tracking-widest">Browse</span>
+</a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full py-4 mb-8 bg-[#e08dff] text-[#0e0e10] text-[10px] font-black tracking-widest rounded-none hover:opacity-90 transition-opacity">
+        START RECORDING
+      </button>
+<div class="flex flex-col gap-2 mb-4">
+<a class="flex items-center gap-4 px-2 py-2 text-[#767577] hover:text-[#e08dff] text-xs" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-4 px-2 py-2 text-[#767577] hover:text-[#e08dff] text-xs" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="palette">palette</span>
+<span>Theme</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Top Navigation (Shared Component Integration) -->
+<header class="fixed top-0 w-full z-40 md:pl-64 h-16 bg-[#0e0e10] flex justify-between items-center px-6 text-[#e08dff] font-space-grotesk tracking-tighter uppercase">
+<div class="flex items-center gap-6">
+<span class="md:hidden text-2xl font-black text-[#e08dff] tracking-tighter">THE DIGITAL STUDIO</span>
+<!-- Search area styled as per JSON search_bar: on_left -->
+<div class="hidden md:flex items-center bg-[#131315] rounded-full px-4 py-1.5 gap-2 border border-white/5">
+<span class="material-symbols-outlined text-sm opacity-50" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-[10px] w-48 placeholder:text-[#767577]" placeholder="SEARCH STUDIO..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex gap-8 text-[11px] font-bold">
+<a class="text-[#00eefc] border-l-2 border-[#00eefc] pl-2" href="#">Library</a>
+<a class="text-[#767577] hover:text-[#e08dff] transition-colors duration-200" href="#">Favorites</a>
+<a class="text-[#767577] hover:text-[#e08dff] transition-colors duration-200" href="#">Browse</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined hover:text-[#e08dff] transition-colors" data-icon="contrast">contrast</button>
+<button class="material-symbols-outlined active:scale-95 transition-transform" data-icon="mic">mic</button>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-24 pb-32 px-6 md:pl-72 md:pr-12 max-w-[1600px] mx-auto min-h-screen">
+<!-- Hero / State of Mind Section -->
+<section class="mb-16">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<h1 class="font-headline text-5xl md:text-7xl font-extralight tracking-tighter leading-tight text-on-surface">
+            The Flow <br/> <span class="italic text-primary font-normal">State</span>
+</h1>
+<p class="mt-6 text-on-surface-variant label-font text-lg font-light leading-relaxed max-w-md">
+            Your sonic sanctuary. Curated frequencies for deep focus and intentional presence.
+          </p>
+</div>
+<!-- YouTube Input (Specific Task Requirement) -->
+<div class="w-full md:w-[400px] bg-surface-container-low p-6 rounded-xl">
+<label class="label-font text-[10px] uppercase tracking-widest text-on-surface-variant mb-3 block">Ingest New Frequency</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-none rounded-full py-4 px-6 label-font text-sm focus:ring-2 focus:ring-primary-fixed-dim transition-all text-on-surface" placeholder="Paste YouTube URL here..." type="text"/>
+<button class="absolute right-2 top-2 bg-primary text-on-primary w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-dim transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Library -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<!-- Main Featured Card -->
+<div class="md:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-low aspect-[16/9] flex items-end p-10">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Minimalist architectural stairs in soft morning light with clean shadows and warm stone textures" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAHoXfFGOVsIvCrPh_hBF3KiRBILWy66QwOjrxj5agZZu2tfL-82Icc57oYbWeDeNup50jicdxqlzpbKaqxHearTmVRKtk3MxKAlzUtY6bK8_XyWeCdS_TaZpNJq-GyHmAUi_ANNA6WH9PJQOSs78kh0O0eUeRgvz1W7cNAkrwz-7vwBAVu3oGUmh752Hngt5elsBTrsjYXKruu7ZJzeIKGc97jL0zxGbLHY15Sl6FiD1gEv3Lu2IxJrCiLHhPcXTE8QlgOQ1YzUKg')">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest/80 via-transparent to-transparent"></div>
+<div class="relative z-10 w-full flex justify-between items-end">
+<div>
+<span class="label-font text-xs uppercase tracking-widest text-primary font-bold mb-2 block">Current Sequence</span>
+<h2 class="font-headline text-4xl font-semibold text-on-surface tracking-tighter">Nordic Echoes</h2>
+<p class="label-font text-on-surface-variant mt-1">432Hz Ambient • 12 Tracks</p>
+</div>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-full font-semibold label-font text-xs tracking-widest flex items-center gap-3 hover:scale-105 transition-transform">
+            RESUME FLOW
+            <span class="material-symbols-outlined text-lg" data-icon="play_arrow" data-weight="fill">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Secondary Info Cards -->
+<div class="md:col-span-4 grid grid-rows-2 gap-6">
+<!-- Flow Timer Custom Component -->
+<div class="bg-surface-container rounded-xl p-8 flex flex-col items-center justify-center text-center">
+<div class="relative w-32 h-32 mb-4">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="60" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="64" cy="64" fill="transparent" r="60" stroke="currentColor" stroke-dasharray="376.8" stroke-dashoffset="100" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-headline text-3xl font-light">45</span>
+</div>
+</div>
+<span class="label-font text-[10px] uppercase tracking-[0.3em] text-on-surface-variant">Focus Session</span>
+<p class="text-xs text-outline mt-1 italic">Remaining</p>
+</div>
+<div class="bg-primary-container/30 rounded-xl p-8 flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<h3 class="font-headline text-xl font-semibold text-on-primary-container">Daily Insight</h3>
+<p class="label-font text-sm text-on-primary-fixed-variant mt-2">Music at 60BPM synchronizes with the alpha brain waves of relaxation.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Song Library Table (Clean Editorial List) -->
+<section>
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline text-3xl font-light tracking-tight">Recent Frequencies</h2>
+<div class="flex gap-4">
+<button class="label-font text-xs font-bold text-on-surface-variant hover:text-primary transition-colors">SORT BY DATE</button>
+<button class="label-font text-xs font-bold text-on-surface-variant hover:text-primary transition-colors">A-Z</button>
+</div>
+</div>
+<div class="space-y-4">
+<!-- List Header -->
+<div class="grid grid-cols-12 px-6 py-2 label-font text-[10px] uppercase tracking-widest text-outline">
+<div class="col-span-6">Frequency / Artist</div>
+<div class="col-span-3 text-center">Duration</div>
+<div class="col-span-3 text-right">Energy</div>
+</div>
+<!-- Library Items -->
+<div class="group grid grid-cols-12 items-center px-6 py-6 bg-surface-container-low rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<div class="col-span-6 flex items-center gap-6">
+<div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Macro photography of smooth river stones in shallow water with soft reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1bzlty8_xg37rQY3vWIeS-1lZWa4QFL_-Tf3qOuiV7quxD1Ms6DMMZitl0mpFkoPlx-ZKeBxnEMj0eqcVd4PeULbac3TahDfCtBo9PryGrPT60Z8xOXskZhhkG4nLOgD1SwJFsU69moKZTPN-1c8Jt18bDcVAkxYswdZha4CzS8vlcQBG8GsIim6ITiGxksyOwKUvWvNy0WC4OQs3k_VfwzKsbwc5OYIlTn_-951oga92SLAlEIWtl8NtYxARf2PxN_q5Oa6HkdQ"/>
+</div>
+<div>
+<h4 class="font-headline text-lg font-medium">Deep Water Meditation</h4>
+<p class="label-font text-sm text-on-surface-variant">Lofi Pulse</p>
+</div>
+</div>
+<div class="col-span-3 text-center label-font text-sm text-on-surface-variant">08:42</div>
+<div class="col-span-3 flex justify-end items-center gap-4">
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
+</div>
+</div>
+<div class="group grid grid-cols-12 items-center px-6 py-6 bg-surface-container-low rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<div class="col-span-6 flex items-center gap-6">
+<div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Abstract soft blurred background with organic shapes in shades of sage green and cream" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc8GfYsxVz9heSy2RoGaZDpUW9KBc_NDWxksRFZG1dDOzp8HRFTW78rx4xYFafxsf3glBZFOWrCTjGUq8SRXwWAtZ-k1-0ROKV9UxKr-c_xGm9NZebyR2B4tQYQZwcwTSWwCaljJWA2XHs39Idh1qmVfdcGtxcFDDzeUINllPhPc55L7TeNLc5sftIQdwAfETqCgJcJFFweCVAa8RbAYr3nmpqeBDZcEreD1w2LKnF9WApLhAHYhb1QLZzGUMYGWSxYbqwDBO1PcI"/>
+</div>
+<div>
+<h4 class="font-headline text-lg font-medium">Geometric Focus</h4>
+<p class="label-font text-sm text-on-surface-variant">Synthesized Zen</p>
+</div>
+</div>
+<div class="col-span-3 text-center label-font text-sm text-on-surface-variant">12:15</div>
+<div class="col-span-3 flex justify-end items-center gap-4">
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
+</div>
+</div>
+<div class="group grid grid-cols-12 items-center px-6 py-6 bg-surface-container-low rounded-xl hover:bg-surface-container transition-all cursor-pointer">
+<div class="col-span-6 flex items-center gap-6">
+<div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="Misty forest in the early morning with soft light filtering through tall pine trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCshp-J9d--VxzrBtK-_VOmhLLIMn9N8zxOqzWBZBUZ5f65-oMO8-jNIEzbGhhVTC-u9_ikZJa2Tl90opZWYr95xLLkDIvV7WeJ-iTFxd2nHE1xBj5bDMgh5-u_RkKKk7VLctOLio5LtkHPU8jO7J8SDtXOd5MZqeahySjw2dUEKrfq2daBftS7pHvdnLQzHQXrjE4AVT-VStu07wkEpDy8w-6d-TfcjB-oWFEpQHCsD-kBdujUFLoprUK_FO7V6uMHUEmJDGl7qoY"/>
+</div>
+<div>
+<h4 class="font-headline text-lg font-medium">Autumn Mist</h4>
+<p class="label-font text-sm text-on-surface-variant">Natural Reverb</p>
+</div>
+</div>
+<div class="col-span-3 text-center label-font text-sm text-on-surface-variant">06:50</div>
+<div class="col-span-3 flex justify-end items-center gap-4">
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/30"></div>
+</div>
+<button class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity" data-icon="more_vert">more_vert</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Persistent Player (Glassmorphism as per Design System) -->
+<footer class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl z-50">
+<div class="bg-surface-container-low/80 backdrop-blur-xl rounded-full p-3 flex items-center gap-6 shadow-2xl shadow-on-surface/5 border border-outline-variant/10">
+<!-- Track Info -->
+<div class="flex items-center gap-4 px-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-primary-container">
+<img class="w-full h-full object-cover" data-alt="album art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiMv93GvTmjQswJHCwuPjeE-XeVVhdgbL2hVy22CBlogpaT0LLSPJ5gOkjTA8flTyRMNSHiWPd12-jdqoTPCraOX_ehbvVHxmiy08zvCkkMEEiP9LkCWpM7nWeJozxuAKhWPtSdK8HC7FQimAywh7SPwUKUcAvcdXUR0wkInJUNf42JC-2f_NXc_ksj98dY_G04-GoQVknhAUJuhxcgQg2egOEK3G_UJgOTSqhHHyTWgFpi1Img6_wtruQuZiCi-IvkS55ri_65RI"/>
+</div>
+<div class="hidden sm:block">
+<p class="label-font text-[11px] font-bold tracking-tight text-on-surface truncate max-w-[120px]">Deep Water Meditation</p>
+<p class="label-font text-[10px] text-on-surface-variant">02:45 / 08:42</p>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex-1 flex items-center justify-center gap-8">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="skip_previous">skip_previous</button>
+<button class="w-12 h-12 bg-primary text-on-primary rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-2xl" data-icon="pause" data-weight="fill">pause</span>
+</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="skip_next">skip_next</button>
+</div>
+<!-- Volume & Secondary -->
+<div class="flex items-center gap-6 px-6">
+<div class="hidden md:flex items-center gap-3 w-24">
+<span class="material-symbols-outlined text-lg text-on-surface-variant" data-icon="volume_up">volume_up</span>
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full relative">
+<div class="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full"></div>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant" data-icon="shuffle">shuffle</button>
+</div>
+</div>
+</footer>
+<!-- Bottom Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-lowest flex justify-around py-4 z-40 border-t border-outline-variant/10">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="library_music" data-weight="fill">library_music</span>
+<span class="label-font text-[10px] font-bold">Library</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="label-font text-[10px]">Saved</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="label-font text-[10px]">Browse</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="label-font text-[10px]">Me</span>
+</a>
+</nav>
+
+```</body></html>

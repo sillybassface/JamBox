@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>THE DIGITAL STUDIO - Master Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#0e0e10",
+                    "surface-dim": "#0e0e10",
+                    "on-surface": "#f9f5f8",
+                    "primary-dim": "#bc00fb",
+                    "on-primary-fixed": "#000000",
+                    "tertiary": "#ff6e81",
+                    "on-tertiary": "#490012",
+                    "inverse-surface": "#fcf8fb",
+                    "tertiary-dim": "#e7004c",
+                    "error-container": "#a70138",
+                    "on-background": "#f9f5f8",
+                    "primary-container": "#d978ff",
+                    "secondary-fixed": "#00eefc",
+                    "error-dim": "#d73357",
+                    "on-secondary-container": "#e3fdff",
+                    "secondary-container": "#006970",
+                    "on-primary": "#4f006c",
+                    "on-error": "#490013",
+                    "primary-fixed": "#d978ff",
+                    "surface-variant": "#262528",
+                    "surface-container-lowest": "#000000",
+                    "background": "#0e0e10",
+                    "surface-container": "#19191c",
+                    "error": "#ff6e84",
+                    "surface-container-high": "#1f1f22",
+                    "primary": "#e08dff",
+                    "tertiary-container": "#ff0355",
+                    "surface-container-highest": "#262528",
+                    "on-secondary-fixed-variant": "#005e64",
+                    "surface-container-low": "#131315",
+                    "outline-variant": "#48474a",
+                    "tertiary-fixed": "#ff909b",
+                    "on-surface-variant": "#adaaad",
+                    "inverse-on-surface": "#565557",
+                    "on-secondary": "#005359",
+                    "tertiary-fixed-dim": "#ff7989",
+                    "outline": "#767577",
+                    "secondary-dim": "#00deec",
+                    "on-tertiary-fixed": "#39000c",
+                    "on-primary-fixed-variant": "#4c0068",
+                    "surface-tint": "#e08dff",
+                    "primary-fixed-dim": "#d160ff",
+                    "on-tertiary-container": "#000000",
+                    "surface-bright": "#2c2c2f",
+                    "secondary": "#00eefc",
+                    "secondary-fixed-dim": "#00deec",
+                    "inverse-primary": "#9a00cf",
+                    "on-secondary-fixed": "#003f43",
+                    "on-primary-container": "#3d0055",
+                    "on-error-container": "#ffb2b9",
+                    "on-tertiary-fixed-variant": "#780023"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Manrope"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .waveform-mask {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e10; }
+        ::-webkit-scrollbar-thumb { background: #262528; }
+        ::-webkit-scrollbar-thumb:hover { background: #e08dff; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#0e0e10] flex justify-between items-center h-16 px-6 w-full font-space-grotesk tracking-tighter uppercase">
+<div class="flex items-center gap-8">
+<h1 class="text-2xl font-black text-[#e08dff] tracking-tighter">THE DIGITAL STUDIO</h1>
+<nav class="hidden md:flex gap-6">
+<a class="text-[#767577] hover:text-[#e08dff] transition-colors duration-200" href="#">Library</a>
+<a class="text-[#767577] hover:text-[#e08dff] transition-colors duration-200" href="#">Favorites</a>
+<a class="text-[#00eefc] border-l-2 border-[#00eefc] pl-2 hover:text-[#e08dff] transition-colors duration-200" href="#">Browse</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-lowest flex items-center px-3 h-10 gap-2 border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-secondary text-sm">mic</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs font-label uppercase tracking-widest w-48 text-on-surface-variant" placeholder="SEARCH ASSETS..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-all active:scale-95">contrast</button>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-all active:scale-95">mic</button>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="h-full w-64 fixed left-0 top-0 bg-[#131315] flex flex-col h-full py-8 pt-24 hidden md:flex border-r border-outline-variant/10">
+<div class="px-6 mb-12">
+<div class="text-[#e08dff] font-black text-xl font-headline tracking-tighter uppercase">STUDIO</div>
+<div class="text-[10px] text-outline font-bold tracking-[0.3em] font-headline uppercase">MASTER CONSOLE</div>
+</div>
+<nav class="flex-1">
+<div class="space-y-1">
+<a class="flex items-center gap-4 px-6 py-4 text-[#767577] hover:bg-[#262528] hover:text-[#e08dff] transition-all scale-102" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="font-space-grotesk font-bold uppercase text-sm">Library</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-4 text-[#767577] hover:bg-[#262528] hover:text-[#e08dff] transition-all scale-102" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-space-grotesk font-bold uppercase text-sm">Favorites</span>
+</a>
+<a class="flex items-center gap-4 px-6 py-4 text-[#00eefc] border-l-4 border-[#00eefc] bg-[#262528] transition-all scale-102" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-space-grotesk font-bold uppercase text-sm">Browse</span>
+</a>
+</div>
+</nav>
+<div class="px-6 mt-auto space-y-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-black py-4 tracking-tighter hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+                START RECORDING
+            </button>
+<div class="space-y-4 pt-6 border-t border-outline-variant/10">
+<a class="flex items-center gap-4 text-[#767577] hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span class="font-label text-[10px] tracking-widest font-bold uppercase">Settings</span>
+</a>
+<a class="flex items-center gap-4 text-[#767577] hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">palette</span>
+<span class="font-label text-[10px] tracking-widest font-bold uppercase">Theme</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-0 md:ml-64 pt-16 h-screen flex flex-col bg-surface">
+<!-- Hero Header Area -->
+<section class="p-8 pb-4 flex items-end justify-between relative overflow-hidden h-64 shrink-0">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-30 grayscale hover:grayscale-0 transition-all duration-700" data-alt="cinematic close-up of a high-end music production studio with neon purple ambient lighting reflecting off metal faders and gear" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfOEilfIB06utPT6JR5kTDXtDGFmQvM-c3a6OYQlgou8KF8Zp3co3kOSabmtSEI8pcseLVf9doFvaELRRXEyYpQx3U7--2POaOBf_S90hAUJ_zUgjm0_bxVz9Tq6ZkbpEfSMch3kGYwgna9HXkEX2SVwxiNtAG0WnkuZZNinSzW-E8Cj0LJQCnot2Ecs3JouehoiRpx4T2dsSU1cGzT87zzAQ5p0x1h3CZhi4xHFcIQz2zSO9ImtlRzcK82nqiI-hmdyxMY6LyoE8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/80 to-transparent"></div>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-secondary text-on-secondary-fixed text-[10px] font-black px-2 py-0.5 tracking-tighter font-headline">SESSION ACTIVE</span>
+<span class="text-outline text-[10px] font-headline tracking-widest font-bold">48KHZ / 24BIT</span>
+</div>
+<h2 class="text-7xl font-black font-headline tracking-tighter leading-none text-on-surface uppercase mb-2">CYBERPUNK_DRAFT_04</h2>
+<div class="flex items-center gap-4">
+<span class="text-primary font-headline font-bold text-xl">128 BPM</span>
+<span class="w-1 h-1 bg-outline-variant"></span>
+<span class="text-on-surface-variant font-headline font-bold text-xl">4 / 4 TIME</span>
+</div>
+</div>
+<div class="relative z-10 flex flex-col items-end gap-2">
+<div class="text-right">
+<div class="text-4xl font-headline font-light tracking-tighter text-secondary">00:03:42:12</div>
+<div class="text-[10px] text-outline font-bold tracking-[0.2em] font-headline">TIMECODE_GLOBAL</div>
+</div>
+</div>
+</section>
+<!-- Stems Workstation -->
+<section class="flex-1 overflow-y-auto px-8 py-4 space-y-4">
+<!-- Stem 01: Drums -->
+<div class="grid grid-cols-[12rem_1fr] bg-surface-container-low border-l-4 border-primary group">
+<div class="p-4 bg-surface-container-high flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-headline font-bold text-outline tracking-widest">CH 01</span>
+<span class="material-symbols-outlined text-primary text-lg">layers</span>
+</div>
+<h4 class="font-headline font-black text-lg leading-tight uppercase">DRUM_SECTION</h4>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-primary hover:text-on-primary transition-colors">MUTE</button>
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-secondary hover:text-on-secondary transition-colors">SOLO</button>
+</div>
+</div>
+<div class="relative flex items-center px-8 bg-surface-container-lowest/50">
+<!-- Waveform Visualizer -->
+<div class="w-full h-16 flex items-center gap-[2px] opacity-80 group-hover:opacity-100 transition-opacity">
+<div class="flex-1 bg-primary h-[20%]"></div>
+<div class="flex-1 bg-primary h-[40%]"></div>
+<div class="flex-1 bg-primary h-[80%]"></div>
+<div class="flex-1 bg-primary h-[60%]"></div>
+<div class="flex-1 bg-primary h-[90%]"></div>
+<div class="flex-1 bg-primary h-[100%]"></div>
+<div class="flex-1 bg-primary h-[50%]"></div>
+<div class="flex-1 bg-primary h-[30%]"></div>
+<div class="flex-1 bg-primary h-[70%]"></div>
+<div class="flex-1 bg-primary h-[95%]"></div>
+<div class="flex-1 bg-primary h-[40%]"></div>
+<div class="flex-1 bg-primary h-[60%]"></div>
+<div class="flex-1 bg-primary h-[85%]"></div>
+<div class="flex-1 bg-primary h-[20%]"></div>
+<div class="flex-1 bg-primary h-[55%]"></div>
+<div class="flex-1 bg-primary h-[75%]"></div>
+<div class="flex-1 bg-primary h-[35%]"></div>
+<div class="flex-1 bg-primary h-[10%]"></div>
+<div class="flex-1 bg-primary h-[90%]"></div>
+<div class="flex-1 bg-primary h-[65%]"></div>
+</div>
+<!-- Volume Indicator Overlay -->
+<div class="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-4">
+<div class="w-32 h-1 bg-surface-container-highest relative">
+<div class="absolute left-0 top-0 h-full w-[75%] bg-secondary"></div>
+<div class="absolute left-[75%] top-1/2 -translate-y-1/2 w-3 h-3 bg-on-surface ring-2 ring-secondary"></div>
+</div>
+<span class="text-[10px] font-headline font-bold text-secondary w-8">-3.2dB</span>
+</div>
+</div>
+</div>
+<!-- Stem 02: Bass -->
+<div class="grid grid-cols-[12rem_1fr] bg-surface-container-low border-l-4 border-secondary group">
+<div class="p-4 bg-surface-container-high flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-headline font-bold text-outline tracking-widest">CH 02</span>
+<span class="material-symbols-outlined text-secondary text-lg">waves</span>
+</div>
+<h4 class="font-headline font-black text-lg leading-tight uppercase">SUB_SYNTH</h4>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-primary hover:text-on-primary transition-colors">MUTE</button>
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-secondary hover:text-on-secondary transition-colors">SOLO</button>
+</div>
+</div>
+<div class="relative flex items-center px-8 bg-surface-container-lowest/50">
+<div class="w-full h-16 flex items-center gap-[2px] opacity-50 group-hover:opacity-100 transition-opacity">
+<div class="flex-1 bg-secondary h-[40%]"></div>
+<div class="flex-1 bg-secondary h-[45%]"></div>
+<div class="flex-1 bg-secondary h-[50%]"></div>
+<div class="flex-1 bg-secondary h-[48%]"></div>
+<div class="flex-1 bg-secondary h-[52%]"></div>
+<div class="flex-1 bg-secondary h-[40%]"></div>
+<div class="flex-1 bg-secondary h-[35%]"></div>
+<div class="flex-1 bg-secondary h-[45%]"></div>
+<div class="flex-1 bg-secondary h-[60%]"></div>
+<div class="flex-1 bg-secondary h-[55%]"></div>
+<div class="flex-1 bg-secondary h-[50%]"></div>
+<div class="flex-1 bg-secondary h-[45%]"></div>
+<div class="flex-1 bg-secondary h-[40%]"></div>
+<div class="flex-1 bg-secondary h-[45%]"></div>
+<div class="flex-1 bg-secondary h-[50%]"></div>
+<div class="flex-1 bg-secondary h-[55%]"></div>
+<div class="flex-1 bg-secondary h-[45%]"></div>
+<div class="flex-1 bg-secondary h-[40%]"></div>
+<div class="flex-1 bg-secondary h-[35%]"></div>
+<div class="flex-1 bg-secondary h-[30%]"></div>
+</div>
+<div class="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-4">
+<div class="w-32 h-1 bg-surface-container-highest relative">
+<div class="absolute left-0 top-0 h-full w-[45%] bg-secondary"></div>
+<div class="absolute left-[45%] top-1/2 -translate-y-1/2 w-3 h-3 bg-on-surface ring-2 ring-secondary"></div>
+</div>
+<span class="text-[10px] font-headline font-bold text-secondary w-8">-12.0dB</span>
+</div>
+</div>
+</div>
+<!-- Stem 03: Lead -->
+<div class="grid grid-cols-[12rem_1fr] bg-surface-container-low border-l-4 border-tertiary group">
+<div class="p-4 bg-surface-container-high flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-headline font-bold text-outline tracking-widest">CH 03</span>
+<span class="material-symbols-outlined text-tertiary text-lg">auto_awesome</span>
+</div>
+<h4 class="font-headline font-black text-lg leading-tight uppercase">LEAD_VOCAL_01</h4>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-primary hover:text-on-primary transition-colors">MUTE</button>
+<button class="flex-1 py-1 border border-outline/30 text-[10px] font-headline font-bold hover:bg-secondary hover:text-on-secondary transition-colors">SOLO</button>
+</div>
+</div>
+<div class="relative flex items-center px-8 bg-surface-container-lowest/50">
+<div class="w-full h-16 flex items-center gap-[2px] opacity-80 group-hover:opacity-100 transition-opacity">
+<div class="flex-1 bg-tertiary h-[10%]"></div>
+<div class="flex-1 bg-tertiary h-[20%]"></div>
+<div class="flex-1 bg-tertiary h-[5%]"></div>
+<div class="flex-1 bg-tertiary h-[40%]"></div>
+<div class="flex-1 bg-tertiary h-[70%]"></div>
+<div class="flex-1 bg-tertiary h-[80%]"></div>
+<div class="flex-1 bg-tertiary h-[20%]"></div>
+<div class="flex-1 bg-tertiary h-[15%]"></div>
+<div class="flex-1 bg-tertiary h-[60%]"></div>
+<div class="flex-1 bg-tertiary h-[90%]"></div>
+<div class="flex-1 bg-tertiary h-[40%]"></div>
+<div class="flex-1 bg-tertiary h-[30%]"></div>
+<div class="flex-1 bg-tertiary h-[85%]"></div>
+<div class="flex-1 bg-tertiary h-[100%]"></div>
+<div class="flex-1 bg-tertiary h-[20%]"></div>
+<div class="flex-1 bg-tertiary h-[60%]"></div>
+<div class="flex-1 bg-tertiary h-[40%]"></div>
+<div class="flex-1 bg-tertiary h-[15%]"></div>
+<div class="flex-1 bg-tertiary h-[30%]"></div>
+<div class="flex-1 bg-tertiary h-[25%]"></div>
+</div>
+<div class="absolute right-8 top-1/2 -translate-y-1/2 flex items-center gap-4">
+<div class="w-32 h-1 bg-surface-container-highest relative">
+<div class="absolute left-0 top-0 h-full w-[90%] bg-secondary"></div>
+<div class="absolute left-[90%] top-1/2 -translate-y-1/2 w-3 h-3 bg-on-surface ring-2 ring-secondary"></div>
+</div>
+<span class="text-[10px] font-headline font-bold text-secondary w-8">+0.5dB</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Transport Bar -->
+<footer class="h-24 bg-surface-container-high/90 backdrop-blur-xl border-t border-outline-variant/10 px-8 flex items-center justify-between z-50">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-outline hover:text-on-surface transition-colors">skip_previous</button>
+<button class="w-12 h-12 flex items-center justify-center bg-primary text-on-primary hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button class="material-symbols-outlined text-outline hover:text-on-surface transition-colors">skip_next</button>
+</div>
+<div class="hidden xl:block">
+<div class="text-[10px] text-outline font-bold font-headline tracking-widest uppercase">CURRENTLY_SOLO</div>
+<div class="text-on-surface font-headline font-black uppercase text-sm">CH 03 - MAIN VOCALS</div>
+</div>
+</div>
+<div class="flex-1 max-w-2xl px-12">
+<div class="flex justify-between items-end mb-2">
+<span class="text-[10px] font-headline font-bold text-secondary">03:42</span>
+<span class="text-[10px] font-headline font-bold text-outline">05:14</span>
+</div>
+<div class="h-[6px] bg-surface-container-lowest w-full relative">
+<div class="absolute left-0 top-0 h-full w-[70%] bg-gradient-to-r from-primary to-secondary"></div>
+<div class="absolute left-[70%] top-1/2 -translate-y-1/2 w-[2px] h-6 bg-on-surface"></div>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<div class="w-12 h-12 rounded-full border-2 border-error flex items-center justify-center text-error group-hover:bg-error group-hover:text-on-error transition-all active:scale-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+</div>
+<span class="text-[8px] font-headline font-black text-error tracking-[0.2em]">REC</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline text-lg">volume_up</span>
+<div class="w-24 h-1 bg-surface-container-lowest relative">
+<div class="absolute left-0 top-0 h-full w-[80%] bg-on-surface"></div>
+</div>
+</div>
+<button class="material-symbols-outlined text-outline hover:text-secondary">open_in_full</button>
+</div>
+</footer>
+</main>
+</body></html>
