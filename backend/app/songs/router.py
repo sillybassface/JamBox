@@ -7,8 +7,19 @@ from app.songs.service import add_song
 from app.auth.dependencies import get_optional_user, require_admin
 from app.config import settings
 import shutil
+import uuid
+import re
 
 router = APIRouter(prefix="/api/songs", tags=["songs"])
+
+UUID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I
+)
+
+
+def _validate_song_id(song_id: str) -> None:
+    if not UUID_PATTERN.match(song_id):
+        raise HTTPException(status_code=400, detail="Invalid song ID format")
 
 
 @router.get("", response_model=list[SongOut])
@@ -19,6 +30,7 @@ async def list_songs(user: UserOut | None = Depends(get_optional_user)):
 
 @router.get("/{song_id}", response_model=SongOut)
 async def get_song(song_id: str, user: UserOut | None = Depends(get_optional_user)):
+    _validate_song_id(song_id)
     db = await get_db()
     song = await repository.get_song(db, song_id, user_id=user.id if user else None)
     if not song:
@@ -32,7 +44,9 @@ async def get_song(song_id: str, user: UserOut | None = Depends(get_optional_use
 
 
 @router.post("", response_model=AddSongResponse, status_code=202)
-async def create_song(body: SongCreate, user: UserOut | None = Depends(get_optional_user)):
+async def create_song(
+    body: SongCreate, user: UserOut | None = Depends(get_optional_user)
+):
     try:
         return await add_song(body.youtube_url, user_id=user.id if user else None)
     except ValueError as e:
@@ -41,6 +55,7 @@ async def create_song(body: SongCreate, user: UserOut | None = Depends(get_optio
 
 @router.delete("/{song_id}", status_code=204)
 async def delete_song(song_id: str, user: UserOut = Depends(require_admin)):
+    _validate_song_id(song_id)
     db = await get_db()
     song = await repository.get_song(db, song_id)
     if not song:

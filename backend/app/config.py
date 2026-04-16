@@ -1,5 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+import os
+import secrets
+
+
+def _generate_secret_key() -> str:
+    return secrets.token_hex(32)
 
 
 class Settings(BaseSettings):
@@ -8,7 +14,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "Jambox"
     debug: bool = False
-    secret_key: str = "change-me-in-production-please-use-random-32-bytes"
+    secret_key: str = _generate_secret_key()
     frontend_url: str = "http://localhost:5173"
 
     # Database
@@ -24,7 +30,7 @@ class Settings(BaseSettings):
     jwt_expire_days: int = 7
 
     # Admins (comma-separated emails, or set via ADMIN_EMAILS env var)
-    admin_emails: list[str] = ["consoilangthang@gmail.com"]
+    admin_emails: list[str] = []
 
     @property
     def db_path(self) -> Path:

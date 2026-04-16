@@ -1,4 +1,4 @@
-import { StemState } from '../../hooks/useMultiStemPlayer'
+import { StemState } from '../../hooks/useCustomAudioPlayer'
 
 interface Props {
   stem: StemState

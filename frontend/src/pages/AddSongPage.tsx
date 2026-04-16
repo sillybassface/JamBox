@@ -72,8 +72,9 @@ export default function AddSongPage() {
         songId: result.song.id,
         taskId: result.task_id,
       })
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to add song'
+      setError(msg)
     } finally {
       setLoading(false)
     }

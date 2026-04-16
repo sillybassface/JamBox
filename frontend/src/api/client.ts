@@ -56,6 +56,18 @@ export type WaveformData = {
   samples_per_pixel: number
 }
 
+export type ChordEntry = { chord: string; beat: number }
+export type Measure = { index: number; start: number; end: number; chords: ChordEntry[] }
+export type ChordData = {
+  tempo: number
+  time_signature: number
+  key: string
+  beat_duration: number
+  measure_duration: number
+  measures: Measure[]
+  error?: string
+}
+
 export const api = {
   // Auth
   me: () => req<User | null>('/auth/me'),
@@ -81,4 +93,14 @@ export const api = {
   waveformUrl: (songId: string, stem: string) => `/api/audio/${songId}/${stem}/waveform`,
   getWaveform: (songId: string, stem: string) =>
     req<WaveformData>(`/audio/${songId}/${stem}/waveform`),
+
+  // Chords — returns null when not yet ready (202)
+  getChords: async (songId: string): Promise<ChordData | null> => {
+    const res = await fetch(`/api/audio/${songId}/chords`, { credentials: 'include' })
+    if (res.status === 202) return null
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return res.json()
+  },
+  generateChords: (songId: string): Promise<{ status: string }> =>
+    req<{ status: string }>(`/audio/${songId}/chords`, { method: 'POST' }),
 }

@@ -34,7 +34,9 @@ export function useTaskWebSocket(
           setEvent(data)
           onEventRef.current?.(data)
         }
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to parse WebSocket message:', e)
+      }
     }
 
     ws.onerror = () => {
@@ -67,7 +69,9 @@ export function useTaskPolling(taskId: string | null, intervalMs = 2000) {
             if (intervalRef.current) clearInterval(intervalRef.current)
           }
         }
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to poll task:', e)
+      }
     }
 
     poll()

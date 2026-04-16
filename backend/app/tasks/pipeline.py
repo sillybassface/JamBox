@@ -232,8 +232,21 @@ async def _generate_peaks(mp3_path: Path, output_path: Path, samples_per_pixel: 
     }))
 
 
+async def _background_chords(song_dir: Path):
+    """Run chord detection in a thread pool; non-fatal."""
+    import logging
+    from app.audio.chord_detection import save_chords
+    loop = asyncio.get_event_loop()
+    try:
+        await loop.run_in_executor(None, save_chords, song_dir)
+    except Exception as exc:
+        logging.getLogger(__name__).warning(f"Background chord detection failed: {exc}")
+
+
 async def run_pipeline(song_id: str, youtube_url: str, progress: ProgressCallback):
-    """Full pipeline: download → separate (with --mp3) → waveform."""
+    """Full pipeline: download → separate (with --mp3) → waveform → chords (background)."""
     await step_download(song_id, youtube_url, progress)
     await step_separate(song_id, progress)
     await step_waveform(song_id, progress)
+    # Chord detection runs in background so song is marked ready immediately
+    asyncio.create_task(_background_chords(settings.songs_dir / song_id))

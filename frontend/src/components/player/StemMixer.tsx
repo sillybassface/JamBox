@@ -1,5 +1,5 @@
 import StemControl from './StemControl'
-import { StemState } from '../../hooks/useMultiStemPlayer'
+import { StemState } from '../../hooks/useCustomAudioPlayer'
 
 interface Props {
   stemStates: Map<string, StemState>

@@ -2,6 +2,7 @@ import re
 import uuid
 import subprocess
 import json
+import logging
 from typing import Optional
 from app.database import get_db
 from app.songs import repository
@@ -9,6 +10,7 @@ from app.tasks import repository as task_repo
 from app.tasks.worker import enqueue
 from app.models import SongOut, AddSongResponse
 
+logger = logging.getLogger(__name__)
 
 YOUTUBE_PATTERNS = [
     r"(?:v=|youtu\.be/|embed/|shorts/)([a-zA-Z0-9_-]{11})",
@@ -40,9 +42,14 @@ async def fetch_youtube_metadata(url: str) -> dict:
                 "duration_secs": data.get("duration"),
                 "thumbnail_url": data.get("thumbnail"),
             }
-    except Exception:
-        pass
-    return {"title": "Unknown Title", "artist": None, "duration_secs": None, "thumbnail_url": None}
+    except Exception as e:
+        logger.warning(f"Failed to fetch YouTube metadata for {url}: {e}")
+    return {
+        "title": "Unknown Title",
+        "artist": None,
+        "duration_secs": None,
+        "thumbnail_url": None,
+    }
 
 
 async def add_song(youtube_url: str, user_id: Optional[str] = None) -> AddSongResponse:
@@ -58,7 +65,7 @@ async def add_song(youtube_url: str, user_id: Optional[str] = None) -> AddSongRe
         # Return existing song with a new task if it failed, otherwise existing task
         async with db.execute(
             "SELECT * FROM tasks WHERE song_id = ? ORDER BY created_at DESC LIMIT 1",
-            (existing.id,)
+            (existing.id,),
         ) as cur:
             task_row = await cur.fetchone()
         if task_row:

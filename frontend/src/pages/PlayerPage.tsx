@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api, Song } from '../api/client'
 import { usePlayer } from '../contexts/PlayerContext'
 import TransportControls from '../components/player/TransportControls'
 import StemRow from '../components/player/StemRow'
+import ChordChart from '../components/player/ChordChart'
+import Equalizer, { EQ_PRESETS } from '../components/player/Equalizer'
 import FavouriteButton from '../components/common/FavouriteButton'
 import StatusBadge from '../components/common/StatusBadge'
 
@@ -14,12 +16,77 @@ export default function PlayerPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [showDegree, setShowDegree] = useState(false)
+  const [isInstrumentsOpen, setIsInstrumentsOpen] = useState(true)
+  const [isEqualizerOpen, setIsEqualizerOpen] = useState(false)
+  const [eqPreset, setEqPreset] = useState('Flat')
+  const [eqGains, setEqGains] = useState<number[]>(() => [...EQ_PRESETS.Flat])
+  const [customEqGains, setCustomEqGains] = useState<number[]>(() => new Array(10).fill(0))
+  const [eqKey, setEqKey] = useState(0)
+  const [eqInitialGains, setEqInitialGains] = useState<number[] | undefined>(() => [...EQ_PRESETS.Flat])
+  const eqGainsRef = useRef(eqGains)
+  const customEqGainsRef = useRef(customEqGains)
+
+  // Keep refs in sync
+  useEffect(() => {
+    eqGainsRef.current = eqGains
+  }, [eqGains])
+  useEffect(() => {
+    customEqGainsRef.current = customEqGains
+  }, [customEqGains])
+
   const {
     song: activeSong, stems, loadSong,
     stemStates, isReady, isPlaying, currentTime, duration, masterVolume,
     togglePlay, seek, seekRelative,
-    setMasterVolume, setVolume, toggleMute, toggleSolo, resetMixer,
+    setMasterVolume, setVolume, setEq, toggleMute, toggleSolo, resetMixer,
   } = usePlayer()
+
+  const handleEqChange = useCallback((gains: number[], isExternal: boolean) => {
+    // Skip processing during external preset sync to avoid loop
+    if (isExternal) return
+    
+    setEqGains(gains)
+    setEq(gains)
+  }, [setEq])
+
+  // Track custom gains - save whenever eqGains changes while in Custom mode
+  useEffect(() => {
+    if (eqPreset === 'Custom') {
+      setCustomEqGains(eqGains)
+    }
+  }, [eqPreset, eqGains])
+
+  const handleEqUserChange = useCallback(() => {
+    setEqPreset('Custom')
+    setEqInitialGains(undefined) // let Equalizer manage its own state after user interaction
+  }, [])
+
+  const handlePresetChange = useCallback((preset: string) => {
+    const currentEqGains = [...eqGainsRef.current]
+
+    // Save current gains when leaving Custom mode
+    if (eqPreset === 'Custom') {
+      setCustomEqGains(currentEqGains)
+      customEqGainsRef.current = currentEqGains
+    }
+
+    if (preset === 'Custom') {
+      // Restore saved custom gains; remount Equalizer so sliders reflect restored values
+      const restored = [...customEqGainsRef.current]
+      setEqGains(restored)
+      setEq(restored)
+      setEqInitialGains(restored)
+      setEqKey(k => k + 1)
+    } else {
+      const gains = EQ_PRESETS[preset] || EQ_PRESETS.Flat
+      setEqGains(gains)
+      setEq(gains)
+      setEqInitialGains(gains)
+      setEqKey(k => k + 1)
+    }
+    setEqPreset(preset)
+  }, [eqPreset, setEq])
 
   // Fetch song metadata for this page, then hand it to the shared player
   useEffect(() => {
@@ -35,17 +102,34 @@ export default function PlayerPage() {
   }, [songId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard shortcuts
+  const toggleStemMute = useCallback((key: string) => {
+    const stemName = key.toLowerCase()
+    const stemMap: Record<string, string> = { v: 'vocals', d: 'drums', b: 'bass', o: 'other' }
+    const name = stemMap[stemName]
+    if (name) toggleMute(name)
+  }, [toggleMute])
+
+  const seek10 = useCallback((seconds: number) => {
+    const newTime = Math.max(0, Math.min(duration, currentTime + seconds))
+    seek(newTime)
+  }, [currentTime, duration, seek])
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName.toLowerCase()
       if (tag === 'input' || tag === 'textarea') return
       if (e.code === 'Space') { e.preventDefault(); togglePlay() }
-      if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5) }
-      if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5) }
+      if (e.code === 'KeyC') { e.preventDefault(); setShowDegree(d => !d) }
+      if (e.code === 'ArrowLeft') { e.preventDefault(); seek10(-10) }
+      if (e.code === 'ArrowRight') { e.preventDefault(); seek10(10) }
+      if (e.code === 'KeyV') { e.preventDefault(); toggleStemMute('v') }
+      if (e.code === 'KeyD') { e.preventDefault(); toggleStemMute('d') }
+      if (e.code === 'KeyB') { e.preventDefault(); toggleStemMute('b') }
+      if (e.code === 'KeyO') { e.preventDefault(); toggleStemMute('o') }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [togglePlay, seekRelative])
+  }, [togglePlay, seek10, toggleStemMute, setShowDegree])
 
   // The song to display: prefer the page-fetched metadata (freshest); fall back
   // to what's already loaded in the shared player (e.g. navigated here from library)
@@ -136,6 +220,17 @@ export default function PlayerPage() {
       {!wrongSong && (
         <div className="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
 
+          {/* Chord Chart */}
+          <div className="border-b border-white/5">
+            <ChordChart
+              songId={song.id}
+              currentTime={currentTime}
+              duration={duration}
+              showDegree={showDegree}
+              onShowDegreeChange={setShowDegree}
+            />
+          </div>
+
           {/* Transport row */}
           <div className="px-6 py-5 border-b border-white/5">
             <TransportControls
@@ -152,36 +247,89 @@ export default function PlayerPage() {
           </div>
 
           {/* Mixer header */}
-          <div className="flex items-center justify-between px-6 py-3 bg-surface-container-low/60">
-            <span className="font-headline font-bold text-xs uppercase tracking-widest text-on-surface-variant">
-              Stem Mixer
-            </span>
+          <div className="flex items-center justify-between w-full px-6 py-3">
             <button
-              onClick={resetMixer}
-              className="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant hover:text-on-surface border border-outline-variant/30 px-3 py-1 rounded-lg transition-colors"
+              onClick={(e) => { e.stopPropagation(); setIsInstrumentsOpen(!isInstrumentsOpen) }}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer"
             >
-              Reset All
+              <span className="material-symbols-outlined text-sm transition-transform" style={{ transform: isInstrumentsOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                chevron_right
+              </span>
+              <span className="font-headline font-bold text-xs uppercase tracking-widest text-primary">
+                Instruments
+              </span>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); resetMixer() }}
+              className="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant hover:text-on-surface border border-outline-variant/30 px-3 py-1 rounded-lg transition-colors cursor-pointer"
+            >
+              Reset
             </button>
           </div>
 
           {/* Stem rows */}
-          <div className="divide-y divide-white/5">
-            {stems.map(name => {
-              const stem = stemStates.get(name)
-              if (!stem) return null
-              return (
-                <StemRow
-                  key={name}
-                  stem={stem}
-                  currentTime={currentTime}
-                  duration={duration}
-                  onVolumeChange={setVolume}
-                  onToggleMute={toggleMute}
-                  onToggleSolo={toggleSolo}
-                />
-              )
-            })}
+          {isInstrumentsOpen && (() => {
+            const anySoloed = [...stemStates.values()].some(s => s.soloed)
+            return (
+              <div className="divide-y divide-white/5">
+                {stems.map(name => {
+                  const stem = stemStates.get(name)
+                  if (!stem) return null
+                  return (
+                    <StemRow
+                      key={name}
+                      stem={stem}
+                      currentTime={currentTime}
+                      duration={duration}
+                      anySoloed={anySoloed}
+                      onVolumeChange={setVolume}
+                      onToggleMute={toggleMute}
+                      onToggleSolo={toggleSolo}
+                      onSeek={seek}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })()}
+
+          {/* Equalizer header */}
+          <div className="flex items-center justify-between w-full px-6 py-3">
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsEqualizerOpen(!isEqualizerOpen) }}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm transition-transform" style={{ transform: isEqualizerOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                chevron_right
+              </span>
+              <span className="font-headline font-bold text-xs uppercase tracking-widest text-primary">
+                Equalizer
+              </span>
+            </button>
+            <select
+              value={eqPreset}
+              onChange={(e) => { e.stopPropagation(); handlePresetChange(e.target.value) }}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[10px] font-bold bg-surface-container border border-white/10 rounded-lg px-2 py-0.5 text-on-surface hover:border-white/20 transition-colors cursor-pointer"
+            >
+              {Object.keys(EQ_PRESETS).map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+              <option value="Custom">Custom</option>
+            </select>
           </div>
+
+          {/* Equalizer controls */}
+          {isEqualizerOpen && (
+            <div className="px-6 py-4 border-t border-white/5">
+              <Equalizer
+                key={eqKey}
+                onEqChange={handleEqChange}
+                onUserChange={handleEqUserChange}
+                initialGains={eqInitialGains}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

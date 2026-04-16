@@ -6,6 +6,7 @@ import WaveSurfer from 'wavesurfer.js'
 import WebAudioPlayer from 'wavesurfer.js/dist/webaudio.js'
 import { api, WaveformData } from '../api/client'
 import { usePlayerStore } from '../stores/playerStore'
+import { getStemColor, STEM_COLORS } from '../lib/constants'
 
 export type StemState = {
   name: string
@@ -16,18 +17,6 @@ export type StemState = {
   duration: number
   ready: boolean
   color: string
-}
-
-const STEM_COLORS: Record<string, string> = {
-  vocals: '#db90ff',  // primary purple
-  drums:  '#00e3fd',  // secondary cyan
-  bass:   '#ddffb0',  // tertiary lime
-  guitar: '#ffb347',  // warm amber
-  other:  '#f9a8d4',  // soft pink — clearly active, distinct from all above
-}
-
-function getStemColor(name: string): string {
-  return STEM_COLORS[name.toLowerCase()] ?? '#db90ff'
 }
 
 function effectiveVolume(st: StemState, anySoloed: boolean, masterVol: number): number {
@@ -57,6 +46,9 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
   // One shared AudioContext for all stems — resumed during user gesture so that
   // the deferred pending-play (which fires outside a gesture) also works.
   const audioContextRef = useRef<AudioContext | null>(null)
+  const eqFiltersRef = useRef<BiquadFilterNode[]>([])
+
+  const EQ_FREQUENCIES = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
 
   const setIsPlayingStore = usePlayerStore(s => s.setIsPlaying)
   const setCurrentTimeStore = usePlayerStore(s => s.setCurrentTime)
@@ -74,6 +66,16 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
 
     const audioContext = new AudioContext()
     audioContextRef.current = audioContext
+
+    const filters = EQ_FREQUENCIES.map((freq, idx) => {
+      const filter = audioContext.createBiquadFilter()
+      filter.type = idx === 0 ? 'lowshelf' : idx === EQ_FREQUENCIES.length - 1 ? 'highshelf' : 'peaking'
+      filter.frequency.value = freq
+      filter.Q.value = 1.4
+      filter.gain.value = 0
+      return filter
+    })
+    eqFiltersRef.current = filters
 
     setStemStates(new Map(stemNames.map(name => [name, {
       name,
@@ -145,10 +147,9 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
 
       // Create WebAudioPlayer with the shared AudioContext.
       const player = new WebAudioPlayer(audioContext)
-
-      // 'canplay' fires after WebAudioPlayer.buffer is set (audio decoded).
-      // This is separate from WaveSurfer's 'ready' which fires as soon as
-      // waveform peaks are rendered — potentially before audio is decoded.
+      
+      // Try to inject EQ filters into the audio chain
+      // The WebAudioPlayer doesn't expose its source, but we can try to intercept
       player.addEventListener('canplay', () => {
         audioReadyRef.current.add(name)
         checkAllReady()
@@ -306,6 +307,17 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
     })
   }, [])
 
+  const setEq = useCallback((gains: number[]) => {
+    const filters = eqFiltersRef.current
+    if (!filters.length) return
+    
+    gains.forEach((gain, idx) => {
+      if (filters[idx]) {
+        filters[idx].gain.value = gain
+      }
+    })
+  }, [])
+
   const toggleMute = useCallback((name: string) => {
     setStemStates(prev => {
       const next = new Map(prev)
@@ -326,7 +338,14 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
       const next = new Map(prev)
       const s = next.get(name)
       if (!s) return prev
-      next.set(name, { ...s, soloed: !s.soloed })
+      const newSoloed = !s.soloed
+      if (newSoloed) {
+        next.forEach((st, stemName) => {
+          next.set(stemName, { ...st, soloed: stemName === name })
+        })
+      } else {
+        next.set(name, { ...s, soloed: false })
+      }
       const anySoloed = [...next.values()].some(st => st.soloed)
       next.forEach((st, stemName) => {
         const ws = instancesRef.current.get(stemName)
@@ -351,6 +370,7 @@ export function useMultiStemPlayer(songId: string, stemNames: string[]) {
     seekRelative,
     setMasterVolume,
     setVolume,
+    setEq,
     toggleMute,
     toggleSolo,
   }

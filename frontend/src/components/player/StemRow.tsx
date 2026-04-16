@@ -1,16 +1,21 @@
-import { StemState } from '../../hooks/useMultiStemPlayer'
+import { useState } from 'react'
+import { StemState } from '../../hooks/useCustomAudioPlayer'
 
 interface Props {
   stem: StemState
   currentTime: number
   duration: number
+  anySoloed: boolean
   onVolumeChange: (name: string, vol: number) => void
   onToggleMute: (name: string) => void
   onToggleSolo: (name: string) => void
+  onSeek: (time: number) => void
 }
 
-export default function StemRow({ stem, currentTime, duration, onVolumeChange, onToggleMute, onToggleSolo }: Props) {
+export default function StemRow({ stem, currentTime, duration, anySoloed, onVolumeChange, onToggleMute, onToggleSolo, onSeek }: Props) {
   const { name, volume, muted, soloed, peaks, color } = stem
+  const dimmed = anySoloed && !soloed
+  const [hoverPct, setHoverPct] = useState<number | null>(null)
 
   // Downsample to ~150 bars — dense enough to look like a real waveform
   const BAR_COUNT = 150
@@ -26,9 +31,9 @@ export default function StemRow({ stem, currentTime, duration, onVolumeChange, o
 
   return (
     <div
-      className={`flex items-center gap-4 px-6 py-4 transition-colors ${
+      className={`flex items-center gap-4 px-6 py-4 transition-all ${
         soloed ? 'bg-primary/5' : muted ? 'bg-surface-container-low/50' : 'hover:bg-surface-container-high/30'
-      }`}
+      } ${dimmed ? 'opacity-35' : 'opacity-100'}`}
     >
       {/* Stem label — w-16 */}
       <div className="w-16 flex-shrink-0">
@@ -67,7 +72,19 @@ export default function StemRow({ stem, currentTime, duration, onVolumeChange, o
       </div>
 
       {/* Waveform — flex-1, vertically aligned with progress bar above */}
-      <div className="flex-1 relative h-12 overflow-hidden flex items-center gap-px">
+      <div
+        className="flex-1 relative h-12 overflow-hidden flex items-center gap-px cursor-pointer"
+        onClick={(e) => {
+          if (!duration) return
+          const rect = e.currentTarget.getBoundingClientRect()
+          onSeek(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration)
+        }}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect()
+          setHoverPct(Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)))
+        }}
+        onMouseLeave={() => setHoverPct(null)}
+      >
         {previewPeaks.map((p, i) => (
           <div
             key={i}
@@ -100,6 +117,19 @@ export default function StemRow({ stem, currentTime, duration, onVolumeChange, o
               backgroundColor: 'white',
               opacity: 0.85,
               boxShadow: `0 0 6px 2px rgba(255,255,255,0.35), 0 0 2px 0px ${color}`,
+              transform: 'translateX(-50%)',
+            }}
+          />
+        )}
+
+        {/* Hover seek preview line */}
+        {hoverPct !== null && duration > 0 && (
+          <div
+            className="absolute top-0 bottom-0 w-px pointer-events-none"
+            style={{
+              left: `${hoverPct * 100}%`,
+              backgroundColor: 'white',
+              opacity: 0.4,
               transform: 'translateX(-50%)',
             }}
           />

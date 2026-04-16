@@ -122,8 +122,9 @@ export default function LibraryPage() {
     try {
       const data = await api.getSongs()
       setSongs(data)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to load songs'
+      setError(msg)
     } finally {
       setLoading(false)
     }

@@ -2,11 +2,11 @@
  * PlayerContext — single source of truth for all audio playback.
  *
  * Lives at the app root (above the router) so navigating between pages never
- * destroys or re-creates the WaveSurfer instances. Both PlayerPage and
+ * destroys or re-creates the audio engine. Both PlayerPage and
  * MiniPlayer consume this context; they are just two views of the same engine.
  */
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import { useMultiStemPlayer, StemState } from '../hooks/useMultiStemPlayer'
+import { useCustomAudioPlayer, StemState } from '../hooks/useCustomAudioPlayer'
 import { api, Song } from '../api/client'
 
 const STEM_ORDER = ['vocals', 'drums', 'bass', 'guitar', 'other']
@@ -26,7 +26,7 @@ interface PlayerContextValue {
   // Current song metadata
   song: Song | null
   stems: string[]
-  // Engine state (from useMultiStemPlayer)
+  // Engine state
   stemStates: Map<string, StemState>
   isReady: boolean
   isPlaying: boolean
@@ -40,6 +40,7 @@ interface PlayerContextValue {
   seekRelative: (delta: number) => void
   setMasterVolume: (v: number) => void
   setVolume: (name: string, v: number) => void
+  setEq: (gains: number[]) => void
   toggleMute: (name: string) => void
   toggleSolo: (name: string) => void
   resetMixer: () => void
@@ -51,7 +52,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [song, setSong] = useState<Song | null>(null)
   const [stems, setStems] = useState<string[]>([])
 
-  const engine = useMultiStemPlayer(song?.id ?? '', stems)
+  const engine = useCustomAudioPlayer(song?.id ?? '', stems)
 
   const loadSong = useCallback(async (newSong: Song) => {
     // If this song is already loaded, don't reload
@@ -72,6 +73,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     engine.setMasterVolume(1)
   }, [stems, engine.setVolume, engine.setMasterVolume]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const seekRelative = useCallback((delta: number) => {
+    const newTime = Math.max(0, Math.min(engine.duration, engine.currentTime + delta))
+    engine.seek(newTime)
+  }, [engine.seek, engine.currentTime, engine.duration])
+
   return (
     <PlayerContext.Provider value={{
       song,
@@ -79,6 +85,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       ...engine,
       loadSong,
       resetMixer,
+      seekRelative,
     }}>
       {children}
     </PlayerContext.Provider>
