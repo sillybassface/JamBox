@@ -91,7 +91,7 @@ export type ChordData = {
   error?: string
 }
 
-export type LyricWord = { word: string; start: number; end: number }
+export type LyricWord = { word: string; start: number; end: number; is_phrase_start?: boolean }
 export type LyricsData = { words: LyricWord[] }
 
 export const api = {
@@ -140,7 +140,7 @@ export const api = {
   },
 
   // Lyrics
-  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null }> => {
+  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null; error?: string }> => {
     const res = await fetch(`/api/songs/${songId}/lyrics`, { credentials: 'include' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     return res.json()
