@@ -1,9 +1,8 @@
 """Song analysis: tempo, key, and measure-level chord detection.
 
-Measures are timed from the first detected beat using the median inter-beat
-interval, so measure boundaries align mathematically with the audio grid.
-Each measure gets one or two chords depending on whether a chord change occurs
-mid-measure.
+Beat and downbeat detection is delegated to beat_tracking.detect_beats_and_sections
+(madmom-powered).  Each measure spans one downbeat interval and gets one or two
+chords depending on whether a chord change occurs mid-measure.
 
 When separated stems are available (bass, guitar, other), the detector uses
 them instead of the full mix for cleaner harmonic analysis.  The bass stem
@@ -12,23 +11,26 @@ chords sharing the same pitch classes (e.g. Am vs C).
 """
 
 import json
+import logging
 import subprocess
 from pathlib import Path
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 
 _NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 # Chord quality templates (pitch-class vectors, root at index 0)
 _TEMPLATES: dict[str, np.ndarray] = {
-    "":    np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # major
-    "m":   np.array([1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # minor
-    "7":   np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], dtype=float),  # dom7
-    "maj7":np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1], dtype=float),  # maj7
-    "m7":  np.array([1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0], dtype=float),  # min7
-    "sus2":np.array([1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # sus2
-    "sus4":np.array([1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0], dtype=float),  # sus4
+    "": np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # major
+    "m": np.array([1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # minor
+    "7": np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], dtype=float),  # dom7
+    "maj7": np.array([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1], dtype=float),  # maj7
+    "m7": np.array([1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0], dtype=float),  # min7
+    "sus2": np.array([1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0], dtype=float),  # sus2
+    "sus4": np.array([1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0], dtype=float),  # sus4
     "dim": np.array([1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0], dtype=float),  # dim
     "aug": np.array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], dtype=float),  # aug
 }
@@ -85,6 +87,7 @@ def _load_audio_ffmpeg(path: Path, sr: int = 22050) -> np.ndarray:
             "pipe:1",
         ],
         capture_output=True,
+        timeout=300,  # 5-minute hard limit per file
     )
     if len(result.stdout) < 4:
         raise RuntimeError(f"ffmpeg returned no audio from {path}")
@@ -92,13 +95,23 @@ def _load_audio_ffmpeg(path: Path, sr: int = 22050) -> np.ndarray:
 
 
 def _load_stems_mix(song_dir: Path, sr: int = 22050) -> np.ndarray | None:
-    """Load bass + guitar + other stems and mix them.  Returns None if unavailable."""
+    """Load harmonic stems and mix them.  Returns None if unavailable.
+
+    Prefers bass+guitar+other (6-stem model).  Falls back to bass+other
+    (4-stem htdemucs model which has no guitar stem).
+    """
     stems_dir = song_dir / "stems"
-    stem_files = [stems_dir / f"{s}.mp3" for s in ("bass", "guitar", "other")]
-    if not all(f.exists() for f in stem_files):
-        return None
+    # Try 6-stem layout first (bass + guitar + other)
+    preferred = [stems_dir / f"{s}.mp3" for s in ("bass", "guitar", "other")]
+    if all(f.exists() for f in preferred):
+        stem_files = preferred
+    else:
+        # 4-stem fallback: bass + other (no guitar)
+        fallback = [stems_dir / f"{s}.mp3" for s in ("bass", "other")]
+        if not all(f.exists() for f in fallback):
+            return None
+        stem_files = fallback
     arrays = [_load_audio_ffmpeg(f, sr) for f in stem_files]
-    # Align lengths (stems should be equal, but be safe)
     min_len = min(len(a) for a in arrays)
     mixed = sum(a[:min_len] for a in arrays) / len(arrays)
     return mixed
@@ -110,6 +123,59 @@ def _load_bass_audio(song_dir: Path, sr: int = 22050) -> np.ndarray | None:
     if not bass_path.exists():
         return None
     return _load_audio_ffmpeg(bass_path, sr)
+
+
+def _load_drums_audio(song_dir: Path, sr: int = 22050) -> np.ndarray | None:
+    """Load just the drums stem for kick-drum energy analysis."""
+    drums_path = song_dir / "stems" / "drums.mp3"
+    if not drums_path.exists():
+        return None
+    return _load_audio_ffmpeg(drums_path, sr)
+
+
+def _load_beats_mix(song_dir: Path, sr: int = 22050) -> np.ndarray | None:
+    """Load a beat-optimised mix (all stems) for reliable beat tracking.
+
+    Using all four stems reconstructs the full audio signal, giving the beat
+    tracker the same information as original.wav without loading the large
+    uncompressed file.  Vocals are included because many songs have vocal-only
+    passages where drums/bass drop out entirely.
+    """
+    stems_dir = song_dir / "stems"
+    candidates = [stems_dir / f"{s}.mp3" for s in ("drums", "bass", "other", "vocals")]
+    available = [p for p in candidates if p.exists()]
+    if not available:
+        return None
+    arrays = [_load_audio_ffmpeg(p, sr) for p in available]
+    min_len = min(len(a) for a in arrays)
+    return sum(a[:min_len] for a in arrays) / len(arrays)
+
+
+def _snap_beats_to_onsets(
+    beat_frames: np.ndarray, onset_env: np.ndarray, window: int = 4
+) -> np.ndarray:
+    """Snap each beat frame to the nearest onset peak within ±window frames.
+
+    Corrects quantisation error from the hop-length grid.  Collisions (two
+    beats snapping to the same frame) are resolved by reverting the later beat
+    to its pre-snap position — never worse than the current behaviour.
+    """
+    if len(beat_frames) == 0:
+        return beat_frames
+    n = len(onset_env)
+    snapped: list[int] = []
+    for f in beat_frames:
+        lo = max(0, int(f) - window)
+        hi = min(n - 1, int(f) + window)
+        local_max = lo + int(np.argmax(onset_env[lo : hi + 1]))
+        snapped.append(local_max)
+    # Resolve collisions: revert the later beat to its original frame so
+    # np.diff(beat_list) never produces 0, avoiding division-by-zero in tempo.
+    result = list(snapped)
+    for i in range(1, len(result)):
+        if result[i] <= result[i - 1]:
+            result[i] = int(beat_frames[i])
+    return np.array(result, dtype=int)
 
 
 def _detect_bass_root(bass_chroma: np.ndarray, f0: int, f1: int) -> int | None:
@@ -177,173 +243,302 @@ def _detect_key(chroma: np.ndarray) -> str:
     return best_key
 
 
+
+
 def detect_chords(song_dir: Path) -> dict:
-    """Analyse audio and return measure-level chord data.
+    """Analyse audio and return schema-v2 measure-level chord data.
 
     Prefers separated stems (bass+guitar+other) over the full mix for
     cleaner harmonic analysis.  Uses the bass stem separately to detect
-    the root note as a prior for chord matching.
-
-    Returns a dict with keys: tempo, time_signature, key, beat_duration,
-    measure_duration, measures.  Each measure has: index, start, end, chords
-    (list of 1-2 {chord, beat} entries).
+    the root note as a prior for chord matching.  Beat/downbeat/section
+    detection is handled by beat_tracking.detect_beats_and_sections (madmom).
     """
     import librosa
+
+    from app.audio.beat_tracking import detect_beats_and_sections
 
     sr = 22050
     hop_length = 512  # ~23 ms
 
-    # Try stems first, fall back to original.wav + HPSS
     stems_mix = _load_stems_mix(song_dir, sr)
     bass_audio = _load_bass_audio(song_dir, sr)
 
+    wav_path = song_dir / "original.wav"
+
     if stems_mix is not None:
-        y_harmonic = stems_mix  # already drums/vocals-free
-        # Still need full audio for beat tracking (drums help)
-        wav_path = song_dir / "original.wav"
-        if wav_path.exists():
-            y_full = _load_audio_ffmpeg(wav_path, sr)
-        else:
-            y_full = stems_mix
+        y_harmonic = stems_mix
+        duration = len(stems_mix) / sr
     else:
-        wav_path = song_dir / "original.wav"
         if not wav_path.exists():
             raise FileNotFoundError(f"No audio found in {song_dir}")
         y_full = _load_audio_ffmpeg(wav_path, sr)
         y_harmonic, _ = librosa.effects.hpss(y_full)
+        duration = len(y_full) / sr
 
-    duration = len(y_full) / sr
+    chroma = librosa.feature.chroma_stft(
+        y=y_harmonic, sr=sr, hop_length=hop_length, n_fft=4096
+    )
 
-    chroma = librosa.feature.chroma_cqt(y=y_harmonic, sr=sr, hop_length=hop_length)
-
-    # Bass chroma for root detection
     bass_chroma = None
     if bass_audio is not None:
-        bass_chroma = librosa.feature.chroma_cqt(y=bass_audio, sr=sr, hop_length=hop_length)
+        bass_chroma = librosa.feature.chroma_stft(
+            y=bass_audio, sr=sr, hop_length=hop_length, n_fft=4096
+        )
 
-    # Beat tracking (use full mix — drums help beat detection)
-    _, beat_frames = librosa.beat.beat_track(y=y_full, sr=sr, hop_length=hop_length)
-    beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=hop_length)
-
-    # Stable beat duration: median inter-beat interval (used for tempo + fallback)
-    beat_list: list[float] = [float(bt) for bt in beat_times]
-    if len(beat_list) >= 2:
-        beat_duration = float(np.median(np.diff(beat_list)))
-    else:
-        beat_duration = 0.5  # fallback
-
-    tempo = 60.0 / beat_duration
-    time_sig = 4  # assume 4/4
-    measure_duration = beat_duration * time_sig
-
-    # Key
     key = _detect_key(chroma)
 
-    # Build measure boundaries anchored to actual detected beat times.
-    # This prevents drift: a constant-duration grid accumulates error over the
-    # song; grouping every time_sig beats keeps measure boundaries accurate.
-    measure_bounds: list[tuple[float, float]] = []
+    # Beat/downbeat/section detection — single path, no fallback
+    beat_src = wav_path if wav_path.exists() else None
+    if beat_src is None:
+        raise FileNotFoundError(f"original.wav not found in {song_dir}")
 
-    if len(beat_list) >= time_sig:
-        first_beat = beat_list[0]
-        intro_start = max(0.0, first_beat - measure_duration)
-        # Prepend an intro measure when there is meaningful pre-beat audio
-        if intro_start < first_beat - 0.05:
-            measure_bounds.append((intro_start, first_beat))
+    rhythmic = detect_beats_and_sections(beat_src)
+    beat_times: list[float] = rhythmic["beat_times"]
+    downbeat_times: list[float] = rhythmic["downbeat_times"]
+    sections: list[dict] = rhythmic["sections"]
 
-        n_full = len(beat_list) // time_sig
-        for i in range(n_full):
-            m_start = beat_list[i * time_sig]
-            next_idx = (i + 1) * time_sig
-            if next_idx < len(beat_list):
-                m_end = beat_list[next_idx]
-            else:
-                # Extrapolate end of last full measure from its own beat spacing
-                grp = beat_list[i * time_sig:]
-                last_iv = (grp[-1] - grp[0]) / (len(grp) - 1) if len(grp) > 1 else beat_duration
-                m_end = grp[-1] + last_iv
-            measure_bounds.append((m_start, m_end))
+    logger.info(
+        "Beat detection: %d beats, %d downbeats, %d sections",
+        len(beat_times), len(downbeat_times), len(sections),
+    )
 
-        # Trailing partial measure (fewer than time_sig beats remaining)
-        trailing = n_full * time_sig
-        if trailing < len(beat_list):
-            measure_bounds.append((beat_list[trailing], beat_list[trailing] + measure_duration))
+    # Global tempo = median of section tempos weighted by section duration
+    if sections:
+        total_dur = sum(s["end"] - s["start"] for s in sections)
+        global_tempo = (
+            sum((s["end"] - s["start"]) * s["tempo"] for s in sections) / total_dur
+            if total_dur > 0 else 120.0
+        )
+    elif beat_times:
+        intervals = np.diff(beat_times)
+        global_tempo = 60.0 / float(np.median(intervals)) if len(intervals) > 0 else 120.0
     else:
-        # Fallback: constant-duration grid when too few beats detected
-        t0 = beat_list[0] if beat_list else 0.0
-        grid_start = max(0.0, t0 - measure_duration)
-        t = grid_start
-        while t < duration:
-            measure_bounds.append((t, t + measure_duration))
-            t += measure_duration
+        global_tempo = 120.0
 
+    # Tempo profile and stability from sections
+    tempo_profile = [
+        {"time": round(s["start"], 2), "bpm": round(s["tempo"], 1)}
+        for s in sections
+    ]
+    if len(tempo_profile) == 0 and beat_times:
+        tempo_profile = [{"time": 0.0, "bpm": round(global_tempo, 1)}]
+
+    if len(sections) >= 2:
+        tempos = [s["tempo"] for s in sections]
+        std = float(np.std(tempos))
+        tempo_stability: str = "stable" if std < 2 else "moderate" if std < 5 else "variable"
+    else:
+        tempo_stability = "stable"
+
+    # Build measures from consecutive downbeat pairs
     frames_per_sec = sr / hop_length
 
-    measures = []
-    for idx, (m_start, m_end) in enumerate(measure_bounds):
-        # Divide the measure into time_sig beats using its actual duration
-        m_beat_dur = (m_end - m_start) / time_sig
+    # Resolve which section each downbeat belongs to
+    def _section_for_time(t: float) -> int:
+        for s in sections:
+            if s["start"] <= t < s["end"]:
+                return s["index"]
+        return sections[-1]["index"] if sections else 0
 
-        # Analyze each beat
-        beat_chords: list[str] = []
-        for b in range(time_sig):
-            b_start = m_start + b * m_beat_dur
-            b_end = m_start + (b + 1) * m_beat_dur
-            f0 = int(b_start * frames_per_sec)
-            f1 = int(b_end * frames_per_sec)
+    measures: list[dict] = []
+    measure_idx = 0
 
-            # Get bass root prior for this beat
-            bass_root = None
-            if bass_chroma is not None:
-                bass_root = _detect_bass_root(bass_chroma, f0, f1)
+    if len(downbeat_times) >= 2:
+        for i in range(len(downbeat_times) - 1):
+            m_start = downbeat_times[i]
+            m_end = downbeat_times[i + 1]
+            sec_idx = _section_for_time(m_start)
+            sec = sections[sec_idx] if sec_idx < len(sections) else None
+            time_sig_num = sec["time_sig"]["num"] if sec else 4
 
-            beat_chords.append(_best_chord(chroma[:, f0:f1], bass_root))
+            m_duration = m_end - m_start
+            m_beat_dur = m_duration / time_sig_num if time_sig_num > 0 else m_duration
 
-        # Build chord entries: beat 1 always included; mid-measure changes
-        # only recorded when the chord holds for 2+ beats (noise filter).
-        chord_entries: list[dict] = []
-        prev = None
-        prev_beat = 1
-        for b, chord in enumerate(beat_chords, start=1):
-            if chord != prev:
-                if prev is not None:
-                    if b == 1 or (b - prev_beat) >= 2:
-                        chord_entries.append({"chord": prev, "beat": prev_beat})
-                prev = chord
-                prev_beat = b
-        if prev is not None and (time_sig - prev_beat + 1) >= 2:
-            chord_entries.append({"chord": prev, "beat": prev_beat})
-        if beat_chords and not any(e["beat"] == 1 for e in chord_entries):
-            chord_entries.insert(0, {"chord": beat_chords[0], "beat": 1})
+            beat_chords: list[str] = []
+            for b in range(time_sig_num):
+                b_start = m_start + b * m_beat_dur
+                b_end = m_start + (b + 1) * m_beat_dur
+                f0 = int(b_start * frames_per_sec)
+                f1 = int(b_end * frames_per_sec)
+                bass_root = _detect_bass_root(bass_chroma, f0, f1) if bass_chroma is not None else None
+                beat_chords.append(_best_chord(chroma[:, f0:f1], bass_root))
 
-        measures.append({"index": idx, "start": round(m_start, 3), "end": round(m_end, 3), "chords": chord_entries})
+            measures.append({
+                "index": measure_idx,
+                "start": round(m_start, 3),
+                "end": round(m_end, 3),
+                "section_index": sec_idx,
+                "chords": _compress_beat_chords(beat_chords, time_sig_num),
+            })
+            measure_idx += 1
+
+        # Final partial measure
+        if sections:
+            last_sec = sections[_section_for_time(downbeat_times[-1])]
+            last_measure_dur = last_sec["measure_duration"]
+        else:
+            last_measure_dur = 60.0 / global_tempo * 4
+        last_start = downbeat_times[-1]
+        last_end = last_start + last_measure_dur
+        last_sec_idx = _section_for_time(last_start)
+        measures.append({
+            "index": measure_idx,
+            "start": round(last_start, 3),
+            "end": round(last_end, 3),
+            "section_index": last_sec_idx,
+            "chords": [{"chord": "N", "beat": 1}],
+        })
+    else:
+        # No downbeats detected: fallback constant-duration grid
+        fallback_dur = 60.0 / global_tempo * 4
+        t = 0.0
+        while t < duration:
+            measures.append({
+                "index": measure_idx,
+                "start": round(t, 3),
+                "end": round(t + fallback_dur, 3),
+                "section_index": 0,
+                "chords": [{"chord": "N", "beat": 1}],
+            })
+            measure_idx += 1
+            t += fallback_dur
 
     return {
-        "tempo": round(tempo, 1),
-        "time_signature": time_sig,
+        "schema_version": 2,
         "key": key,
-        "beat_duration": round(beat_duration, 4),
-        "measure_duration": round(measure_duration, 4),
+        "duration": round(duration, 3),
+        "global_tempo": round(global_tempo, 1),
+        "tempo_stability": tempo_stability,
+        "tempo_profile": tempo_profile,
+        "sections": sections,
+        "beat_times": beat_times,
+        "downbeat_times": downbeat_times,
         "measures": measures,
     }
 
 
-def save_chords(song_dir: Path) -> None:
-    """Detect chords and write chords.json. Writes an error marker on failure."""
+def _chord_at_time(old_measures: list[dict], time: float, time_sig: int) -> str:
+    """Return the chord playing at *time* by looking it up in the existing measure data."""
+    for m in old_measures:
+        if m["start"] <= time < m["end"]:
+            m_dur = m["end"] - m["start"]
+            if m_dur <= 0:
+                continue
+            beat_frac = (time - m["start"]) / m_dur * time_sig  # 0-indexed float
+            beat_1indexed = int(beat_frac) + 1  # 1-indexed, clamped below
+            beat_1indexed = max(1, min(beat_1indexed, time_sig))
+            current_chord = "N"
+            for entry in sorted(m["chords"], key=lambda e: e["beat"]):
+                if entry["beat"] <= beat_1indexed:
+                    current_chord = entry["chord"]
+                else:
+                    break
+            return current_chord
+    return "N"
+
+
+def _compress_beat_chords(beat_chords: list[str], time_sig: int) -> list[dict]:
+    """Compress a per-beat chord list to {chord, beat} entries (1-indexed).
+
+    Mirrors the compression logic in detect_chords: beat 1 is always present;
+    mid-measure changes are recorded only when the chord holds for 2+ beats.
+    """
+    entries: list[dict] = []
+    prev: str | None = None
+    prev_beat = 1
+
+    for b, chord in enumerate(beat_chords, start=1):
+        if chord != prev:
+            if prev is not None:
+                if prev_beat == 1 or (b - prev_beat) >= 2:
+                    entries.append({"chord": prev, "beat": prev_beat})
+            prev = chord
+            prev_beat = b
+
+    if prev is not None:
+        remaining = len(beat_chords) - prev_beat + 1
+        if remaining >= 2:
+            entries.append({"chord": prev, "beat": prev_beat})
+
+    if beat_chords and not any(e["beat"] == 1 for e in entries):
+        entries.insert(0, {"chord": beat_chords[0], "beat": 1})
+
+    return entries if entries else [{"chord": "N", "beat": 1}]
+
+
+def rebuild_measures_for_section_timesig(data: dict, section_idx: int, num: int, den: int) -> dict:
+    """Rebuild measures for one section after a manual time-signature override.
+
+    Updates sections[section_idx].time_sig/beat_duration/measure_duration, then
+    rebuilds downbeat_times and measures[] for that section only.  All other
+    sections are left untouched.
+    """
+    sections: list[dict] = data.get("sections", [])
+    if section_idx >= len(sections):
+        return data
+
+    sec = sections[section_idx]
+    beat_duration = sec["beat_duration"]
+    new_measure_duration = beat_duration * num
+
+    sec["time_sig"] = {"num": num, "den": den}
+    sec["measure_duration"] = round(new_measure_duration, 5)
+
+    # Rebuild downbeat grid for this section from first_downbeat
+    first_db = sec.get("first_downbeat", sec["start"])
+    new_downbeats: list[float] = []
+    t = first_db
+    while t < sec["end"]:
+        new_downbeats.append(round(t, 4))
+        t += new_measure_duration
+
+    # Replace downbeat_times entries that fall inside this section
+    all_downbeats: list[float] = data.get("downbeat_times", [])
+    outside = [d for d in all_downbeats if not (sec["start"] <= d < sec["end"])]
+    merged_downbeats = sorted(outside + new_downbeats)
+    data["downbeat_times"] = merged_downbeats
+
+    # Rebuild measures[] for this section; preserve others
+    old_measures: list[dict] = data.get("measures", [])
+    kept = [m for m in old_measures if m.get("section_index") != section_idx]
+
+    new_measures: list[dict] = []
+    for i in range(len(new_downbeats) - 1):
+        m_start = new_downbeats[i]
+        m_end = new_downbeats[i + 1]
+        beat_chords = [
+            _chord_at_time(old_measures, m_start + (b + 0.5) * (m_end - m_start) / num, num)
+            for b in range(num)
+        ]
+        new_measures.append({
+            "index": 0,  # re-indexed below
+            "start": round(m_start, 3),
+            "end": round(m_end, 3),
+            "section_index": section_idx,
+            "chords": _compress_beat_chords(beat_chords, num),
+        })
+
+    all_measures = sorted(kept + new_measures, key=lambda m: m["start"])
+    for i, m in enumerate(all_measures):
+        m["index"] = i
+
+    data["measures"] = all_measures
+    return data
+
+
+def save_chords(song_dir: Path) -> bool:
+    """Detect chords and write chords.json.
+
+    Returns True on success. On failure, logs the error and leaves chords.json
+    absent so the next request can trigger a fresh attempt.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
     try:
         data = detect_chords(song_dir)
         (song_dir / "chords.json").write_text(json.dumps(data))
+        return True
     except Exception as exc:
-        (song_dir / "chords.json").write_text(
-            json.dumps(
-                {
-                    "error": str(exc),
-                    "tempo": 0.0,
-                    "time_signature": 4,
-                    "key": "?",
-                    "beat_duration": 0.0,
-                    "measure_duration": 0.0,
-                    "measures": [],
-                }
-            )
-        )
+        logger.warning(f"Chord detection failed for {song_dir}: {exc}")
+        return False

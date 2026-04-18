@@ -15,10 +15,12 @@ def _row_to_task(row: aiosqlite.Row) -> TaskOut:
     )
 
 
-async def create_task(db: aiosqlite.Connection, task_id: str, song_id: str) -> TaskOut:
+async def create_task(
+    db: aiosqlite.Connection, task_id: str, song_id: str, step: Optional[str] = None
+) -> TaskOut:
     await db.execute(
-        "INSERT INTO tasks (id, song_id) VALUES (?, ?)",
-        (task_id, song_id),
+        "INSERT INTO tasks (id, song_id, step) VALUES (?, ?, ?)",
+        (task_id, song_id, step),
     )
     await db.commit()
     return await get_task(db, task_id)
@@ -53,3 +55,17 @@ async def get_incomplete_tasks(db: aiosqlite.Connection) -> list[TaskOut]:
     ) as cur:
         rows = await cur.fetchall()
     return [_row_to_task(r) for r in rows]
+
+
+async def get_task_by_song_and_step(
+    db: aiosqlite.Connection, song_id: str, step: str
+) -> Optional[TaskOut]:
+    """Get most recent task for a song with a given step."""
+    async with db.execute(
+        "SELECT * FROM tasks WHERE song_id = ? AND step = ? ORDER BY created_at DESC LIMIT 1",
+        (song_id, step),
+    ) as cur:
+        row = await cur.fetchone()
+    if not row:
+        return None
+    return _row_to_task(row)

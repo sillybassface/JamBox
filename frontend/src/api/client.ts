@@ -57,16 +57,42 @@ export type WaveformData = {
 }
 
 export type ChordEntry = { chord: string; beat: number }
-export type Measure = { index: number; start: number; end: number; chords: ChordEntry[] }
-export type ChordData = {
+export type TimeSig = { num: number; den: number }
+export type Section = {
+  index: number
+  start: number
+  end: number
   tempo: number
-  time_signature: number
-  key: string
+  time_sig: TimeSig
   beat_duration: number
   measure_duration: number
+  first_downbeat: number
+  confidence: number
+}
+export type Measure = {
+  index: number
+  start: number
+  end: number
+  section_index: number
+  chords: ChordEntry[]
+}
+export type ChordData = {
+  schema_version: number
+  key: string
+  duration: number
+  global_tempo: number
+  tempo_stability: "stable" | "moderate" | "variable"
+  tempo_profile: Array<{ time: number; bpm: number }>
+  sections: Section[]
+  beat_times: number[]
+  downbeat_times: number[]
   measures: Measure[]
+  legacy?: boolean
   error?: string
 }
+
+export type LyricWord = { word: string; start: number; end: number }
+export type LyricsData = { words: LyricWord[] }
 
 export const api = {
   // Auth
@@ -103,4 +129,22 @@ export const api = {
   },
   generateChords: (songId: string): Promise<{ status: string }> =>
     req<{ status: string }>(`/audio/${songId}/chords`, { method: 'POST' }),
+  setSectionTimeSig: async (songId: string, sectionIdx: number, timeSig: { num: number; den: number }): Promise<void> => {
+    const res = await fetch(`/api/audio/${songId}/chords/section/${sectionIdx}/time-sig`, {
+      credentials: 'include',
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(timeSig),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  },
+
+  // Lyrics
+  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null }> => {
+    const res = await fetch(`/api/songs/${songId}/lyrics`, { credentials: 'include' })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return res.json()
+  },
+  generateLyrics: (songId: string): Promise<{ task_id?: string; status: string; lyrics?: LyricsData }> =>
+    req<{ task_id?: string; status: string; lyrics?: LyricsData }>(`/songs/${songId}/lyrics`, { method: 'POST' }),
 }

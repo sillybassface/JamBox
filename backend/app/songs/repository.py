@@ -1,4 +1,5 @@
 import aiosqlite
+import json
 import logging
 from typing import Optional
 from app.models import SongOut
@@ -130,4 +131,25 @@ async def delete_song(db: aiosqlite.Connection, song_id: str):
     except Exception as e:
         await db.rollback()
         logger.exception("Failed to delete song")
+        raise
+
+
+async def get_lyrics(db: aiosqlite.Connection, song_id: str) -> Optional[dict]:
+    async with db.execute("SELECT lyrics FROM songs WHERE id = ?", (song_id,)) as cur:
+        row = await cur.fetchone()
+    if not row or not row["lyrics"]:
+        return None
+    return json.loads(row["lyrics"])
+
+
+async def update_lyrics(db: aiosqlite.Connection, song_id: str, lyrics: dict):
+    try:
+        await db.execute(
+            "UPDATE songs SET lyrics = ?, updated_at = datetime('now') WHERE id = ?",
+            (json.dumps(lyrics), song_id),
+        )
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.exception("Failed to update lyrics")
         raise

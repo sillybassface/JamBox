@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     app_name: str = "Jambox"
     debug: bool = False
     secret_key: str = _generate_secret_key()
-    frontend_url: str = "http://localhost:5173"
+    frontend_url: str = "http://localhost:8080"
 
     # Database
     data_dir: Path = Path(__file__).parent.parent / "data"

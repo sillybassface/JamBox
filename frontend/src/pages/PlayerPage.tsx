@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api, Song } from '../api/client'
+import { api, Song, ChordData } from '../api/client'
 import { usePlayer } from '../contexts/PlayerContext'
 import TransportControls from '../components/player/TransportControls'
 import StemRow from '../components/player/StemRow'
 import ChordChart from '../components/player/ChordChart'
+import Beats from '../components/player/Beats'
+import Lyrics from '../components/player/Lyrics'
 import Equalizer, { EQ_PRESETS } from '../components/player/Equalizer'
 import FavouriteButton from '../components/common/FavouriteButton'
 import StatusBadge from '../components/common/StatusBadge'
@@ -15,8 +17,13 @@ export default function PlayerPage() {
   const [pageSong, setPageSong] = useState<Song | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [chordData, setChordData] = useState<ChordData | null>(null)
 
   const [showDegree, setShowDegree] = useState(false)
+  const [isLyricsOpen, setIsLyricsOpen] = useState(() => {
+    const saved = localStorage.getItem('panel_lyrics')
+    return saved === 'open'
+  })
   const [isInstrumentsOpen, setIsInstrumentsOpen] = useState(true)
   const [isEqualizerOpen, setIsEqualizerOpen] = useState(false)
   const [eqPreset, setEqPreset] = useState('Flat')
@@ -26,6 +33,11 @@ export default function PlayerPage() {
   const [eqInitialGains, setEqInitialGains] = useState<number[] | undefined>(() => [...EQ_PRESETS.Flat])
   const eqGainsRef = useRef(eqGains)
   const customEqGainsRef = useRef(customEqGains)
+
+  // Persist panel state to localStorage
+  useEffect(() => {
+    localStorage.setItem('panel_lyrics', isLyricsOpen ? 'open' : 'collapsed')
+  }, [isLyricsOpen])
 
   // Keep refs in sync
   useEffect(() => {
@@ -91,6 +103,7 @@ export default function PlayerPage() {
   // Fetch song metadata for this page, then hand it to the shared player
   useEffect(() => {
     if (!songId) return
+    setChordData(null)
     setLoading(true)
     api.getSong(songId)
       .then(s => {
@@ -220,14 +233,43 @@ export default function PlayerPage() {
       {!wrongSong && (
         <div className="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
 
+          {/* Beats */}
+          <Beats chordData={chordData} currentTime={currentTime} />
+
+          {/* Lyrics header */}
+          <div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsLyricsOpen(!isLyricsOpen) }}
+              className="flex items-center justify-between w-full px-6 py-3 hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm transition-transform" style={{ transform: isLyricsOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                  chevron_right
+                </span>
+                <span className="font-headline font-bold text-xs uppercase tracking-widest text-primary">
+                  Lyrics
+                </span>
+              </div>
+            </button>
+            {isLyricsOpen && (
+              <div className="border-b border-white/5">
+                <Lyrics
+                  songId={song.id}
+                  currentTime={currentTime}
+                />
+              </div>
+            )}
+          </div>
+
           {/* Chord Chart */}
           <div className="border-b border-white/5">
             <ChordChart
               songId={song.id}
+              songTitle={song.title}
               currentTime={currentTime}
-              duration={duration}
               showDegree={showDegree}
               onShowDegreeChange={setShowDegree}
+              onChordData={setChordData}
             />
           </div>
 

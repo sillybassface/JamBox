@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS songs (
     artist        TEXT,
     duration_secs REAL,
     thumbnail_url TEXT,
+    lyrics       TEXT,
     status        TEXT NOT NULL DEFAULT 'pending',
     error_message TEXT,
     added_by      TEXT REFERENCES users(id) ON DELETE SET NULL,

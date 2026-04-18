@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Body
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from pathlib import Path
 import asyncio
@@ -25,6 +25,8 @@ def _validate_song_id(song_id: str) -> None:
 
 # Song IDs currently undergoing on-demand chord detection
 _generating: set[str] = set()
+# Song IDs whose most recent detection attempt failed
+_failed: set[str] = set()
 
 
 def _stem_path(song_id: str, stem: str) -> Path:
@@ -44,11 +46,16 @@ async def _run_chord_detection(song_id: str):
 
     song_dir = settings.songs_dir / song_id
     try:
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, save_chords, song_dir)
-        logger.info(f"On-demand chord detection complete for {song_id}")
+        loop = asyncio.get_running_loop()
+        success = await loop.run_in_executor(None, save_chords, song_dir)
+        if success:
+            logger.info(f"Chord detection complete for {song_id}")
+        else:
+            logger.warning(f"Chord detection failed for {song_id}")
+            _failed.add(song_id)
     except Exception as exc:
-        logger.warning(f"On-demand chord detection failed for {song_id}: {exc}")
+        logger.warning(f"Chord detection error for {song_id}: {exc}")
+        _failed.add(song_id)
     finally:
         _generating.discard(song_id)
 
@@ -56,14 +63,67 @@ async def _run_chord_detection(song_id: str):
 # ── Chord routes registered BEFORE /{song_id}/{stem} to avoid path conflict ──
 
 
+def _migrate_v1_to_v2(data: dict) -> dict:
+    """Synthesise a v2 shape from a v1 chords.json on the fly (no disk write)."""
+    if data.get("schema_version", 1) >= 2:
+        return data
+
+    beat_times: list = data.get("beat_times", [])
+    downbeat_times: list = data.get("downbeat_times", [])
+    duration: float = data.get("duration", 0.0)
+    tempo: float = data.get("tempo", 120.0)
+    time_sig_num: int = data.get("time_signature", 4)
+    beat_duration: float = data.get("beat_duration", 60.0 / tempo if tempo > 0 else 0.5)
+    measure_duration: float = data.get("measure_duration", beat_duration * time_sig_num)
+    first_downbeat: float = downbeat_times[0] if downbeat_times else 0.0
+
+    section = {
+        "index": 0,
+        "start": 0.0,
+        "end": duration,
+        "tempo": tempo,
+        "time_sig": {"num": time_sig_num, "den": 4},
+        "beat_duration": beat_duration,
+        "measure_duration": measure_duration,
+        "first_downbeat": first_downbeat,
+        "confidence": 0.5,
+    }
+
+    measures = [
+        {**m, "section_index": 0}
+        for m in data.get("measures", [])
+    ]
+
+    migrated = {
+        "schema_version": 2,
+        "key": data.get("key", "C"),
+        "duration": duration,
+        "global_tempo": tempo,
+        "tempo_stability": data.get("tempo_stability", "stable"),
+        "tempo_profile": data.get("tempo_profile", [{"time": 0.0, "bpm": tempo}]),
+        "sections": [section],
+        "beat_times": beat_times,
+        "downbeat_times": downbeat_times,
+        "measures": measures,
+    }
+
+    if not beat_times:
+        migrated["legacy"] = True
+
+    return migrated
+
+
 @router.get("/{song_id}/chords")
 async def get_chords(song_id: str):
     _validate_song_id(song_id)
+    if song_id in _failed:
+        return JSONResponse(content={"error": "detection_failed"})
     path = _chords_path(song_id)
     if not path.exists():
         return JSONResponse(status_code=202, content={"status": "not_ready"})
     async with aiofiles.open(path, "r") as f:
         data = json.loads(await f.read())
+    data = _migrate_v1_to_v2(data)
     return JSONResponse(content=data)
 
 
@@ -74,6 +134,7 @@ async def generate_chords(song_id: str, force: bool = False):
     Pass force=true to delete the existing chords.json and re-analyse.
     """
     _validate_song_id(song_id)
+    _failed.discard(song_id)  # clear any prior failure so a fresh attempt can proceed
     path = _chords_path(song_id)
     if force and path.exists():
         path.unlink()
@@ -86,6 +147,31 @@ async def generate_chords(song_id: str, force: bool = False):
         _generating.add(song_id)
         asyncio.create_task(_run_chord_detection(song_id))
     return {"status": "generating"}
+
+
+@router.patch("/{song_id}/chords/section/{section_idx}/time-sig", status_code=204)
+async def set_section_time_sig(song_id: str, section_idx: int, body: dict = Body(...)):
+    """Override the time signature for one section and immediately rebuild its measures."""
+    from app.audio.chord_detection import rebuild_measures_for_section_timesig
+
+    _validate_song_id(song_id)
+    num = body.get("num")
+    den = body.get("den")
+    if num not in {2, 3, 4, 5, 6, 7, 8, 9, 12}:
+        raise HTTPException(status_code=400, detail="num must be one of 2,3,4,5,6,7,8,9,12")
+    if den not in {2, 4, 8}:
+        raise HTTPException(status_code=400, detail="den must be one of 2,4,8")
+    path = _chords_path(song_id)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Chords not found")
+    async with aiofiles.open(path, "r") as f:
+        data = json.loads(await f.read())
+    loop = asyncio.get_running_loop()
+    data = await loop.run_in_executor(
+        None, rebuild_measures_for_section_timesig, data, section_idx, num, den
+    )
+    async with aiofiles.open(path, "w") as f:
+        await f.write(json.dumps(data))
 
 
 # ── Stem audio routes ──

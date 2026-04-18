@@ -6,7 +6,7 @@ import WaveSurfer from 'wavesurfer.js'
 import WebAudioPlayer from 'wavesurfer.js/dist/webaudio.js'
 import { api, WaveformData } from '../api/client'
 import { usePlayerStore } from '../stores/playerStore'
-import { getStemColor, STEM_COLORS } from '../lib/constants'
+import { getStemColor } from '../lib/constants'
 
 export type StemState = {
   name: string

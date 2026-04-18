@@ -1,27 +1,66 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api, ChordData } from '../../api/client'
 import ChordChartGrid from './ChordChartGrid'
+import { useNotificationStore } from '../../stores/notificationStore'
 
 interface Props {
   songId: string
+  songTitle: string
   currentTime: number
-  duration: number
   showDegree?: boolean
   onShowDegreeChange?: (show: boolean) => void
+  onChordData?: (data: ChordData) => void
 }
 
-export default function ChordChart({ songId, currentTime, duration, showDegree: externalShowDegree, onShowDegreeChange }: Props) {
+export default function ChordChart({ songId, songTitle, currentTime, showDegree: externalShowDegree, onShowDegreeChange, onChordData }: Props) {
   const [chordData, setChordData] = useState<ChordData | null>(null)
-  const [status, setStatus] = useState<'loading' | 'generating' | 'ready' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'unavailable' | 'generating' | 'ready' | 'error'>('loading')
   const [internalShowDegree, setInternalShowDegree] = useState(false)
   const [isOpen, setIsOpen] = useState(true)
   const showDegree = externalShowDegree ?? internalShowDegree
   const setShowDegree = onShowDegreeChange ?? setInternalShowDegree
+
+  // Resolve active section from playhead position
+  const activeSection = useMemo(() => {
+    if (!chordData?.sections?.length) return null
+    for (const s of chordData.sections) {
+      if (currentTime >= s.start && currentTime < s.end) return s
+    }
+    return chordData.sections[chordData.sections.length - 1]
+  }, [chordData, currentTime])
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pushNotif = useNotificationStore(s => s.push)
+  const updateNotif = useNotificationStore(s => s.update)
 
   const stopPoll = useCallback(() => {
     if (pollRef.current !== null) { clearInterval(pollRef.current); pollRef.current = null }
   }, [])
+
+  const startGeneration = useCallback(() => {
+    setStatus('generating')
+    pushNotif({ type: 'processing', title: songTitle, message: `Generating chords for "${songTitle}"…`, songId })
+    pollRef.current = setInterval(() => {
+      api.getChords(songId).then(d => {
+        if (!d) return
+        stopPoll()
+        if (d.error) {
+          setStatus('error')
+          updateNotif(
+            { songId, type: 'processing' },
+            { type: 'error', message: `Error: failed to generate chords for "${songTitle}"`, read: false },
+          )
+          return
+        }
+        setChordData(d); setStatus('ready')
+        onChordData?.(d)
+        updateNotif(
+          { songId, type: 'processing' },
+          { type: 'ready', message: `Generated chords for "${songTitle}".`, read: false },
+        )
+      }).catch(() => {})
+    }, 3000)
+    api.generateChords(songId).catch(() => {})
+  }, [songId, songTitle, songId, pushNotif, stopPoll, updateNotif, onChordData])
 
   useEffect(() => {
     setChordData(null); setStatus('loading'); stopPoll()
@@ -33,17 +72,9 @@ export default function ChordChart({ songId, currentTime, duration, showDegree: 
         if (data) {
           if (data.error) { setStatus('error'); return }
           setChordData(data); setStatus('ready')
+          onChordData?.(data)
         } else {
-          api.generateChords(songId).catch(() => {})
-          setStatus('generating')
-          pollRef.current = setInterval(() => {
-            api.getChords(songId).then(d => {
-              if (cancelled || !d) return
-              stopPoll()
-              if (d.error) { setStatus('error'); return }
-              setChordData(d); setStatus('ready')
-            }).catch(() => {})
-          }, 3000)
+          setStatus('unavailable')
         }
       })
       .catch(() => { if (!cancelled) setStatus('error') })
@@ -69,7 +100,9 @@ export default function ChordChart({ songId, currentTime, duration, showDegree: 
           </button>
           {status === 'ready' && chordData && isOpen && (
             <span className="text-[10px] font-label text-on-surface-variant/70 tabular-nums px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
-              {chordData.key} · {Math.round(chordData.tempo)} BPM · {chordData.time_signature}/4
+              {chordData.key} · {Math.round(chordData.global_tempo)} BPM
+              {activeSection && ` · ${activeSection.time_sig.num}/${activeSection.time_sig.den}`}
+              {chordData.sections.length > 1 && activeSection && ` · §${activeSection.index + 1}`}
             </span>
           )}
         </div>
@@ -95,6 +128,17 @@ export default function ChordChart({ songId, currentTime, duration, showDegree: 
           <span className="material-symbols-outlined text-xl text-primary animate-spin">progress_activity</span>
         </div>
       )}
+      {status === 'unavailable' && (
+        <div className="h-10 flex items-center justify-center gap-2 text-on-surface-variant text-xs">
+          <span>Chord analysis unavailable.</span>
+          <button
+            onClick={startGeneration}
+            className="px-3 py-1 rounded-md bg-primary text-on-primary text-[10px] font-label hover:opacity-90 transition-opacity"
+          >
+            Generate
+          </button>
+        </div>
+      )}
       {status === 'generating' && (
         <div className="h-16 flex items-center justify-center gap-2 text-on-surface-variant text-sm">
           <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -110,7 +154,7 @@ export default function ChordChart({ songId, currentTime, duration, showDegree: 
       {status === 'ready' && chordData && isOpen && (
         <ChordChartGrid
           measures={chordData.measures}
-          timeSig={chordData.time_signature}
+          sections={chordData.sections}
           currentTime={currentTime}
           songKey={chordData.key}
           showDegree={showDegree}

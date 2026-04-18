@@ -1,28 +1,16 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import { Measure } from '../../api/client'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Measure, Section } from '../../api/client'
 import { chordToDegree } from '../../lib/musicTheory'
 
 interface Props {
   measures: Measure[]
-  timeSig: number
+  sections: Section[]
   currentTime: number
   songKey: string
   showDegree: boolean
 }
 
-function timeToPixel(time: number, measures: Measure[], measurePx: number): number {
-  if (!measures.length) return 0
-  if (time < measures[0].start) return 0
-  for (let i = 0; i < measures.length; i++) {
-    const m = measures[i]
-    if (time >= m.start && time < m.end) {
-      return i * measurePx + ((time - m.start) / (m.end - m.start)) * measurePx
-    }
-  }
-  return measures.length * measurePx
-}
-
-export default function ChordChartGrid({ measures, timeSig, currentTime, songKey, showDegree }: Props) {
+export default function ChordChartGrid({ measures, sections, currentTime, songKey, showDegree }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
 
@@ -36,10 +24,24 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
     return () => ro.disconnect()
   }, [])
 
-  // ~5 measures visible; playhead anchored at centre once reached
-  const measurePx = containerWidth > 0 ? Math.floor(containerWidth / 5) : 100
+  // Median measure duration → constant px/s rate so the playhead never drifts
+  // between measures of different lengths (e.g. a short intro measure vs regular measures).
+  const medianMeasureDur = useMemo(() => {
+    if (measures.length < 2) return 2.0
+    const durs = measures.map(m => m.end - m.start).sort((a, b) => a - b)
+    return durs[Math.floor(durs.length / 2)]
+  }, [measures])
+
+  // Pixels per second: show ~5 median-length measures across the container.
+  const pixelsPerSecond = containerWidth > 0 && medianMeasureDur > 0
+    ? containerWidth / (medianMeasureDur * 5)
+    : 50
+
   const cursorX = containerWidth / 2
-  const currentPx = timeToPixel(currentTime, measures, measurePx)
+
+  // Time → pixel is purely proportional — works from t=0 regardless of when
+  // the first measure starts, so the playhead moves through pre-song silence.
+  const currentPx = currentTime * pixelsPerSecond
 
   // Phase 1 — playhead moves left→centre while content stays still
   // Phase 2 — playhead fixed at centre, content scrolls left
@@ -47,7 +49,15 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
   const playheadX = isScrolling ? cursorX : currentPx
   const translateX = isScrolling ? cursorX - currentPx : 0
 
-  // Active measure for chord-label colour
+  // Content strip width: from t=0 to the end of the last measure
+  const contentWidth = measures.length > 0
+    ? measures[measures.length - 1].end * pixelsPerSecond
+    : containerWidth
+
+  // Normalisation factor for the opacity falloff (one "average measure" in px)
+  const avgMeasurePx = medianMeasureDur * pixelsPerSecond  // == containerWidth / 5
+
+  // Active measure index (binary search on time)
   const activeMeasureIdx = (() => {
     if (!measures.length) return -1
     let lo = 0, hi = measures.length - 1
@@ -70,23 +80,37 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
         <>
           {/* ── Scrolling measure strip ──────────────────────────────── */}
           <div
-            className="absolute top-0 h-full flex"
-            style={{ transform: `translateX(${translateX}px)`, willChange: 'transform' }}
+            className="absolute top-0 h-full"
+            style={{ width: contentWidth, transform: `translateX(${translateX}px)`, willChange: 'transform' }}
           >
             {measures.map((m, i) => {
-              const isActive = m.index === activeMeasureIdx
-              const measureCenterPx = i * measurePx + measurePx / 2
-              const distInMeasures = Math.abs(measureCenterPx - currentPx) / measurePx
+              const isActive = i === activeMeasureIdx
+              const measureLeft = m.start * pixelsPerSecond
+              const measureWidth = (m.end - m.start) * pixelsPerSecond
+              const measureCenterPx = measureLeft + measureWidth / 2
+              const distInMeasures = Math.abs(measureCenterPx - currentPx) / avgMeasurePx
               const opacity = Math.max(0.07, Math.pow(0.52, distInMeasures))
+
+              const secIdx = m.section_index ?? 0
+              const sec = sections[secIdx] ?? sections[0]
+              const timeSigNum = sec?.time_sig?.num ?? 4
+
+              // Section boundary: heavier left border when section changes
+              const isSectionBoundary = i > 0 && m.section_index !== measures[i - 1].section_index
 
               return (
                 <div
                   key={m.index}
-                  className="relative h-full flex-shrink-0"
-                  style={{ width: measurePx, opacity }}
+                  className="absolute h-full"
+                  style={{
+                    left: measureLeft,
+                    width: measureWidth,
+                    opacity,
+                    borderLeft: isSectionBoundary ? '2px solid rgba(255,255,255,0.35)' : undefined,
+                  }}
                 >
-                  {/* Beat indicator lines ── beat 1 tall+bright, beats 2-4 short+dim */}
-                  {Array.from({ length: timeSig }).map((_, b) => {
+                  {/* Beat indicator lines ── beat 1 tall+bright, beats 2-N short+dim */}
+                  {Array.from({ length: timeSigNum }).map((_, b) => {
                     const isBeat1 = b === 0
                     // No beat-1 line on the very first measure (nothing to the left)
                     if (isBeat1 && i === 0) return null
@@ -95,7 +119,7 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
                         key={b}
                         className="absolute w-px"
                         style={{
-                          left: `${(b / timeSig) * 100}%`,
+                          left: `${(b / timeSigNum) * 100}%`,
                           top: isBeat1 ? 6 : '35%',
                           bottom: isBeat1 ? 6 : '35%',
                           background: isBeat1
@@ -123,7 +147,7 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
                           'text-base font-black font-mono leading-none',
                           isActive ? 'text-primary' : 'text-on-surface/88',
                         ].join(' ')}
-                        style={{ left: `${((entry.beat - 1) / timeSig) * 100}%` }}
+                        style={{ left: `${((entry.beat - 1) / timeSigNum) * 100}%` }}
                       >
                         {isN ? <span className="opacity-25">·</span> : label}
                       </div>
@@ -131,15 +155,13 @@ export default function ChordChartGrid({ measures, timeSig, currentTime, songKey
                   })}
 
                   {/* Beat dots at bottom — beat 1 larger + brighter */}
-                  {Array.from({ length: timeSig }).map((_, b) => (
+                  {Array.from({ length: timeSigNum }).map((_, b) => (
                     <div
                       key={b}
                       className="absolute"
                       style={{
                         bottom: 7,
-                        left: `${(b / timeSig) * 100}%`,
-                        // beat 1: nudge slightly right of the boundary line
-                        // beats 2-4: centre on their position
+                        left: `${(b / timeSigNum) * 100}%`,
                         transform: b === 0 ? 'translateX(3px)' : 'translateX(-50%)',
                       }}
                     >
