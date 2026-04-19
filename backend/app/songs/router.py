@@ -185,16 +185,26 @@ async def _process_lyrics_task(task_id: str, song_id: str, language: str = "vi")
                 "message": "Starting...",
             },
         )
+        logger.info(f"Starting Whisper for song {song_id}")
 
         success = await asyncio.get_event_loop().run_in_executor(
             None, save_lyrics_sync, song_dir, title, artist, song.youtube_url, language
         )
 
+        logger.info(f"Whisper done, success={success}")
+        
         if success:
             lyrics_path = song_dir / "lyrics.json"
+            logger.info(f"Lyrics path exists: {lyrics_path.exists()}, path: {lyrics_path}")
             if lyrics_path.exists():
                 lyrics = json.loads(lyrics_path.read_text())
-                await repository.update_lyrics(db, song_id, lyrics)
+                logger.info(f"Got lyrics from file: {len(lyrics.get('words', []))} words")
+                await db.execute(
+                    "UPDATE songs SET lyrics = ?, updated_at = datetime('now') WHERE id = ?",
+                    (json.dumps(lyrics), song_id),
+                )
+                await db.commit()
+                logger.info(f"Committed lyrics to DB")
 
                 await task_repo.update_task(
                     db, task_id, status="completed", step="done", progress=1.0
@@ -208,7 +218,7 @@ async def _process_lyrics_task(task_id: str, song_id: str, language: str = "vi")
                         "progress": 1.0,
                     },
                 )
-                logger.info(f"Lyrics processed for song {song_id}")
+                logger.info(f"Lyrics processed for song {song_id}, {len(lyrics.get('words', []))} words")
         else:
             err = "Whisper failed to detect lyrics"
             await task_repo.update_task(

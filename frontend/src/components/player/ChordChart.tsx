@@ -90,7 +90,7 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
   }, [isOpen])
 
   return (
-    <div className="px-6 py-4">
+    <div className="px-6 py-3">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">

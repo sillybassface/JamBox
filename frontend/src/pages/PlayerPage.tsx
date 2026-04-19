@@ -5,7 +5,6 @@ import { usePlayer } from '../contexts/PlayerContext'
 import TransportControls from '../components/player/TransportControls'
 import StemRow from '../components/player/StemRow'
 import ChordChart from '../components/player/ChordChart'
-import Beats from '../components/player/Beats'
 import Lyrics from '../components/player/Lyrics'
 import Equalizer, { EQ_PRESETS } from '../components/player/Equalizer'
 import FavouriteButton from '../components/common/FavouriteButton'
@@ -224,9 +223,6 @@ export default function PlayerPage() {
       {!wrongSong && (
         <div className="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
 
-          {/* Beats */}
-          <Beats chordData={chordData} currentTime={currentTime} />
-
           {/* Lyrics */}
           <div>
             <Lyrics
@@ -263,7 +259,7 @@ export default function PlayerPage() {
           </div>
 
           {/* Mixer header */}
-          <div className="flex items-center w-full px-6 py-3">
+          <div className="flex items-center w-full px-6 py-3 mb-3">
             <button
               onClick={(e) => { e.stopPropagation(); setIsInstrumentsOpen(!isInstrumentsOpen) }}
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer"
@@ -304,7 +300,7 @@ export default function PlayerPage() {
           })()}
 
           {/* Equalizer header */}
-          <div className="flex items-center justify-between w-full px-6 py-3">
+          <div className="flex items-center justify-between w-full px-6 py-3 mb-3">
             <button
               onClick={(e) => { e.stopPropagation(); setIsEqualizerOpen(!isEqualizerOpen) }}
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer"

@@ -116,7 +116,7 @@ export default function Lyrics({ songId, currentTime }: Props) {
   }, [isOpen])
 
   return (
-    <div className="px-6 py-4">
+    <div className="px-6 py-3">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <button
