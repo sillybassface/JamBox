@@ -16,7 +16,10 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
   const [chordData, setChordData] = useState<ChordData | null>(null)
   const [status, setStatus] = useState<'loading' | 'unavailable' | 'generating' | 'ready' | 'error'>('loading')
   const [internalShowDegree, setInternalShowDegree] = useState(false)
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(() => {
+    const saved = localStorage.getItem('panel_chords')
+    return saved !== 'collapsed'
+  })
   const showDegree = externalShowDegree ?? internalShowDegree
   const setShowDegree = onShowDegreeChange ?? setInternalShowDegree
 
@@ -82,6 +85,10 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
     return () => { cancelled = true; stopPoll() }
   }, [songId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    localStorage.setItem('panel_chords', isOpen ? 'open' : 'collapsed')
+  }, [isOpen])
+
   return (
     <div className="px-6 py-4">
       {/* Header */}
@@ -100,9 +107,7 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
           </button>
           {status === 'ready' && chordData && isOpen && (
             <span className="text-[10px] font-label text-on-surface-variant/70 tabular-nums px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
-              {chordData.key} · {Math.round(chordData.global_tempo)} BPM
-              {activeSection && ` · ${activeSection.time_sig.num}/${activeSection.time_sig.den}`}
-              {chordData.sections.length > 1 && activeSection && ` · §${activeSection.index + 1}`}
+              {chordData.key} · {Math.round(chordData.global_tempo)} · {activeSection.time_sig.num}/{activeSection.time_sig.den}
             </span>
           )}
         </div>
@@ -123,42 +128,46 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
         )}
       </div>
 
-      {status === 'loading' && (
-        <div className="h-16 flex items-center justify-center">
-          <span className="material-symbols-outlined text-xl text-primary animate-spin">progress_activity</span>
-        </div>
-      )}
-      {status === 'unavailable' && (
-        <div className="h-10 flex items-center justify-center gap-2 text-on-surface-variant text-xs">
-          <span>Chord analysis unavailable.</span>
-          <button
-            onClick={startGeneration}
-            className="px-3 py-1 rounded-md bg-primary text-on-primary text-[10px] font-label hover:opacity-90 transition-opacity"
-          >
-            Generate
-          </button>
-        </div>
-      )}
-      {status === 'generating' && (
-        <div className="h-16 flex items-center justify-center gap-2 text-on-surface-variant text-sm">
-          <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
-          Detecting chords…
-        </div>
-      )}
-      {status === 'error' && (
-        <div className="h-10 flex items-center justify-center text-on-surface-variant text-xs">
-          Chord analysis unavailable
-        </div>
-      )}
+      {isOpen && (
+        <>
+          {status === 'loading' && (
+            <div className="h-16 flex items-center justify-center">
+              <span className="material-symbols-outlined text-xl text-primary animate-spin">progress_activity</span>
+            </div>
+          )}
+          {status === 'unavailable' && (
+            <div className="h-10 flex items-center justify-center gap-2 text-on-surface-variant text-xs">
+              <span>Chord analysis unavailable.</span>
+              <button
+                onClick={startGeneration}
+                className="px-3 py-1 rounded-md bg-primary text-on-primary text-[10px] font-label hover:opacity-90 transition-opacity"
+              >
+                Generate
+              </button>
+            </div>
+          )}
+          {status === 'generating' && (
+            <div className="h-16 flex items-center justify-center gap-2 text-on-surface-variant text-sm">
+              <span className="material-symbols-outlined text-base animate-spin">progress_activity</span>
+              Detecting chords…
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="h-10 flex items-center justify-center text-on-surface-variant text-xs">
+              Chord analysis unavailable
+            </div>
+          )}
 
-      {status === 'ready' && chordData && isOpen && (
-        <ChordChartGrid
-          measures={chordData.measures}
-          sections={chordData.sections}
-          currentTime={currentTime}
-          songKey={chordData.key}
-          showDegree={showDegree}
-        />
+          {status === 'ready' && chordData && (
+            <ChordChartGrid
+              measures={chordData.measures}
+              sections={chordData.sections}
+              currentTime={currentTime}
+              songKey={chordData.key}
+              showDegree={showDegree}
+            />
+          )}
+        </>
       )}
     </div>
   )

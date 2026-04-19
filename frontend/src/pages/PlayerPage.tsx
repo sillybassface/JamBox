@@ -20,10 +20,6 @@ export default function PlayerPage() {
   const [chordData, setChordData] = useState<ChordData | null>(null)
 
   const [showDegree, setShowDegree] = useState(false)
-  const [isLyricsOpen, setIsLyricsOpen] = useState(() => {
-    const saved = localStorage.getItem('panel_lyrics')
-    return saved === 'open'
-  })
   const [isInstrumentsOpen, setIsInstrumentsOpen] = useState(true)
   const [isEqualizerOpen, setIsEqualizerOpen] = useState(false)
   const [eqPreset, setEqPreset] = useState('Flat')
@@ -33,11 +29,6 @@ export default function PlayerPage() {
   const [eqInitialGains, setEqInitialGains] = useState<number[] | undefined>(() => [...EQ_PRESETS.Flat])
   const eqGainsRef = useRef(eqGains)
   const customEqGainsRef = useRef(customEqGains)
-
-  // Persist panel state to localStorage
-  useEffect(() => {
-    localStorage.setItem('panel_lyrics', isLyricsOpen ? 'open' : 'collapsed')
-  }, [isLyricsOpen])
 
   // Keep refs in sync
   useEffect(() => {
@@ -236,33 +227,16 @@ export default function PlayerPage() {
           {/* Beats */}
           <Beats chordData={chordData} currentTime={currentTime} />
 
-          {/* Lyrics header */}
+          {/* Lyrics */}
           <div>
-            <button
-              onClick={(e) => { e.stopPropagation(); setIsLyricsOpen(!isLyricsOpen) }}
-              className="flex items-center justify-between w-full px-6 py-3 hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm transition-transform" style={{ transform: isLyricsOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>
-                  chevron_right
-                </span>
-                <span className="font-headline font-bold text-xs uppercase tracking-widest text-primary">
-                  Lyrics
-                </span>
-              </div>
-            </button>
-            {isLyricsOpen && (
-              <div className="border-b border-white/5">
-                <Lyrics
-                  songId={song.id}
-                  currentTime={currentTime}
-                />
-              </div>
-            )}
+            <Lyrics
+              songId={song.id}
+              currentTime={currentTime}
+            />
           </div>
 
           {/* Chord Chart */}
-          <div className="border-b border-white/5">
+          <div>
             <ChordChart
               songId={song.id}
               songTitle={song.title}
@@ -274,7 +248,7 @@ export default function PlayerPage() {
           </div>
 
           {/* Transport row */}
-          <div className="px-6 py-5 border-b border-white/5">
+          <div className="px-6 py-5">
             <TransportControls
               isPlaying={isPlaying}
               isReady={isReady}
@@ -289,7 +263,7 @@ export default function PlayerPage() {
           </div>
 
           {/* Mixer header */}
-          <div className="flex items-center justify-between w-full px-6 py-3">
+          <div className="flex items-center w-full px-6 py-3">
             <button
               onClick={(e) => { e.stopPropagation(); setIsInstrumentsOpen(!isInstrumentsOpen) }}
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all cursor-pointer"
@@ -300,12 +274,6 @@ export default function PlayerPage() {
               <span className="font-headline font-bold text-xs uppercase tracking-widest text-primary">
                 Instruments
               </span>
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); resetMixer() }}
-              className="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant hover:text-on-surface border border-outline-variant/30 px-3 py-1 rounded-lg transition-colors cursor-pointer"
-            >
-              Reset
             </button>
           </div>
 
@@ -352,8 +320,10 @@ export default function PlayerPage() {
               value={eqPreset}
               onChange={(e) => { e.stopPropagation(); handlePresetChange(e.target.value) }}
               onClick={(e) => e.stopPropagation()}
-              className="text-[10px] font-bold bg-surface-container border border-white/10 rounded-lg px-2 py-0.5 text-on-surface hover:border-white/20 transition-colors cursor-pointer"
+              className="text-[11px] font-headline font-bold bg-surface-container border border-white/10 rounded-lg px-3 py-1.5 text-on-surface hover:border-white/20 transition-colors cursor-pointer appearance-none pr-7"
+              style={{ backgroundImage: 'none' }}
             >
+              <option value="" disabled hidden></option>
               {Object.keys(EQ_PRESETS).map(name => (
                 <option key={name} value={name}>{name}</option>
               ))}

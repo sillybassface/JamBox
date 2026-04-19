@@ -92,7 +92,7 @@ export type ChordData = {
 }
 
 export type LyricWord = { word: string; start: number; end: number; is_phrase_start?: boolean }
-export type LyricsData = { words: LyricWord[] }
+export type LyricsData = { words: LyricWord[]; source?: 'whisper' | 'hybrid' | 'external' | 'custom'; custom_text?: string }
 
 export const api = {
   // Auth
@@ -140,11 +140,29 @@ export const api = {
   },
 
   // Lyrics
-  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null; error?: string }> => {
+  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null; error?: string; task_status?: string; task_step?: string; task_progress?: number }> => {
     const res = await fetch(`/api/songs/${songId}/lyrics`, { credentials: 'include' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     return res.json()
   },
-  generateLyrics: (songId: string): Promise<{ task_id?: string; status: string; lyrics?: LyricsData }> =>
-    req<{ task_id?: string; status: string; lyrics?: LyricsData }>(`/songs/${songId}/lyrics`, { method: 'POST' }),
+  generateLyrics: (songId: string, language: string = 'vi'): Promise<{ task_id?: string; status: string; lyrics?: LyricsData }> =>
+    req<{ task_id?: string; status: string; lyrics?: LyricsData }>(`/songs/${songId}/lyrics?language=${language}`, { method: 'POST' }),
+  setCustomLyrics: async (songId: string, lyricsText: string, regenerate = false): Promise<{ task_id?: string; status: string; lyrics?: string }> => {
+    const res = await fetch(`/api/songs/${songId}/lyrics`, {
+      credentials: 'include',
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lyrics_text: lyricsText, regenerate }),
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return res.json()
+  },
+  deleteLyrics: async (songId: string): Promise<{ status: string }> => {
+    const res = await fetch(`/api/songs/${songId}/lyrics`, {
+      credentials: 'include',
+      method: 'DELETE',
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return res.json()
+  },
 }

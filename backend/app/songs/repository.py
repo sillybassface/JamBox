@@ -142,12 +142,18 @@ async def get_lyrics(db: aiosqlite.Connection, song_id: str) -> Optional[dict]:
     return json.loads(row["lyrics"])
 
 
-async def update_lyrics(db: aiosqlite.Connection, song_id: str, lyrics: dict):
+async def update_lyrics(db: aiosqlite.Connection, song_id: str, lyrics: dict | None):
     try:
-        await db.execute(
-            "UPDATE songs SET lyrics = ?, updated_at = datetime('now') WHERE id = ?",
-            (json.dumps(lyrics), song_id),
-        )
+        if lyrics is None:
+            await db.execute(
+                "UPDATE songs SET lyrics = NULL, updated_at = datetime('now') WHERE id = ?",
+                (song_id,),
+            )
+        else:
+            await db.execute(
+                "UPDATE songs SET lyrics = ?, updated_at = datetime('now') WHERE id = ?",
+                (json.dumps(lyrics), song_id),
+            )
         await db.commit()
     except Exception as e:
         await db.rollback()
