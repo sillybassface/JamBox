@@ -6,6 +6,7 @@ import json
 import logging
 import aiofiles
 import re
+import uuid
 from app.config import settings
 from app.models import WaveformData
 
@@ -16,17 +17,6 @@ STEM_NAMES = {"vocals", "drums", "bass", "guitar", "other"}
 UUID_PATTERN = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I
 )
-
-
-def _validate_song_id(song_id: str) -> None:
-    if not UUID_PATTERN.match(song_id):
-        raise HTTPException(status_code=400, detail="Invalid song ID format")
-
-
-# Song IDs currently undergoing on-demand chord detection
-_generating: set[str] = set()
-# Song IDs whose most recent detection attempt failed
-_failed: set[str] = set()
 
 
 def _stem_path(song_id: str, stem: str) -> Path:
@@ -41,23 +31,9 @@ def _chords_path(song_id: str) -> Path:
     return settings.songs_dir / song_id / "chords.json"
 
 
-async def _run_chord_detection(song_id: str):
-    from app.audio.chord_detection import save_chords
-
-    song_dir = settings.songs_dir / song_id
-    try:
-        loop = asyncio.get_running_loop()
-        success = await loop.run_in_executor(None, save_chords, song_dir)
-        if success:
-            logger.info(f"Chord detection complete for {song_id}")
-        else:
-            logger.warning(f"Chord detection failed for {song_id}")
-            _failed.add(song_id)
-    except Exception as exc:
-        logger.warning(f"Chord detection error for {song_id}: {exc}")
-        _failed.add(song_id)
-    finally:
-        _generating.discard(song_id)
+def _validate_song_id(song_id: str) -> None:
+    if not UUID_PATTERN.match(song_id):
+        raise HTTPException(status_code=400, detail="Invalid song ID format")
 
 
 # ── Chord routes registered BEFORE /{song_id}/{stem} to avoid path conflict ──
@@ -116,8 +92,6 @@ def _migrate_v1_to_v2(data: dict) -> dict:
 @router.get("/{song_id}/chords")
 async def get_chords(song_id: str):
     _validate_song_id(song_id)
-    if song_id in _failed:
-        return JSONResponse(content={"error": "detection_failed"})
     path = _chords_path(song_id)
     if not path.exists():
         return JSONResponse(status_code=202, content={"status": "not_ready"})
@@ -133,8 +107,11 @@ async def generate_chords(song_id: str, force: bool = False):
 
     Pass force=true to delete the existing chords.json and re-analyse.
     """
+    from app.database import get_db
+    from app.tasks import repository as task_repo
+    from app.tasks.worker import enqueue_chords_only
+
     _validate_song_id(song_id)
-    _failed.discard(song_id)  # clear any prior failure so a fresh attempt can proceed
     path = _chords_path(song_id)
     if force and path.exists():
         path.unlink()
@@ -143,16 +120,18 @@ async def generate_chords(song_id: str, force: bool = False):
     song_dir = settings.songs_dir / song_id
     if not song_dir.exists():
         raise HTTPException(status_code=404, detail="Song not found")
-    if song_id not in _generating:
-        _generating.add(song_id)
-        asyncio.create_task(_run_chord_detection(song_id))
-    return {"status": "generating"}
+
+    db = await get_db()
+    task_id = str(uuid.uuid4())
+    await task_repo.create_task(db, task_id, song_id, "chords")
+    await enqueue_chords_only(task_id, song_id)
+    return {"status": "generating", "task_id": task_id}
 
 
 @router.patch("/{song_id}/chords/section/{section_idx}/time-sig", status_code=204)
 async def set_section_time_sig(song_id: str, section_idx: int, body: dict = Body(...)):
     """Override the time signature for one section and immediately rebuild its measures."""
-    from app.audio.chord_detection import rebuild_measures_for_section_timesig
+    from app.audio.helpers import rebuild_measures_for_section_timesig, update_chords_file
 
     _validate_song_id(song_id)
     num = body.get("num")
@@ -170,8 +149,7 @@ async def set_section_time_sig(song_id: str, section_idx: int, body: dict = Body
     data = await loop.run_in_executor(
         None, rebuild_measures_for_section_timesig, data, section_idx, num, den
     )
-    async with aiofiles.open(path, "w") as f:
-        await f.write(json.dumps(data))
+    await update_chords_file(song_id, data)
 
 
 # ── Stem audio routes ──

@@ -1,0 +1,51 @@
+services:
+  backend:
+    volumes:
+      - ./backend/app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      BACKEND_URL: http://backend:8000
+
+  song-fetcher:
+    volumes:
+      - ./workers/fetcher/app:/app/app
+      - ./workers/fetcher/main.py:/app/main.py
+      - ./workers/fetcher/pipeline.py:/app/pipeline.py
+    command: >
+      sh -c "pip install watchdog -q &&
+             watchmedo auto-restart --recursive --patterns='*.py' --directory=/app -- python main.py"
+
+  song-analyzer:
+    volumes:
+      - ./workers/analyzer/app:/app/app
+      - ./workers/analyzer/main.py:/app/main.py
+      - ./workers/analyzer/pipeline.py:/app/pipeline.py
+      - ./workers/analyzer/demucs_wrapper.py:/app/demucs_wrapper.py
+    command: >
+      sh -c "pip install watchdog -q &&
+             watchmedo auto-restart --recursive --patterns='*.py' --directory=/app -- python main.py"
+
+  song-transcriber:
+    volumes:
+      - ./workers/transcriber/app:/app/app
+      - ./workers/transcriber/main.py:/app/main.py
+    command: >
+      sh -c "pip install watchdog -q &&
+             watchmedo auto-restart --recursive --patterns='*.py' --directory=/app -- python main.py"
+
+  song-transcriber-cuda:
+    volumes:
+      - ./workers/transcriber/app:/app/app
+      - ./workers/transcriber-cuda/app/audio/faster_whisper_detection.py:/app/app/audio/faster_whisper_detection.py
+      - ./workers/transcriber-cuda/main.py:/app/main.py
+    command: >
+      sh -c "pip install watchdog -q &&
+             watchmedo auto-restart --recursive --patterns='*.py' --directory=/app -- python3 main.py"

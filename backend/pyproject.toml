@@ -18,14 +18,11 @@ dependencies = [
     "itsdangerous>=2.2",
     "python-jose[cryptography]>=3.3",
     "aiofiles>=23.2",
-    "numpy>=1.26",
-    "librosa>=0.10",
-    "openai-whisper>=20231117",
+    "redis[hiredis]>=5.0",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "httpx"]
-ml = ["madmom @ git+https://github.com/CPJKU/madmom@main"]
 
 [tool.setuptools.packages.find]
 where = ["."]

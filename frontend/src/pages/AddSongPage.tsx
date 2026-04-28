@@ -14,8 +14,8 @@ function TaskWatcher({ taskId }: { taskId: string }) {
   const STEP_LABELS: Record<string, string> = {
     downloading: 'Downloading audio…',
     separating:  'Separating stems with AI…',
-    converting:  'Converting to MP3…',
     waveform:    'Generating waveforms…',
+    chords:      'Analyzing beats and chords…',
   }
 
   useTaskWebSocket(taskId, (event) => {

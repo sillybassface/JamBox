@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api, Song, ChordData } from '../api/client'
+import { api, Song } from '../api/client'
 import { usePlayer } from '../contexts/PlayerContext'
 import TransportControls from '../components/player/TransportControls'
 import StemRow from '../components/player/StemRow'
@@ -16,8 +16,6 @@ export default function PlayerPage() {
   const [pageSong, setPageSong] = useState<Song | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [chordData, setChordData] = useState<ChordData | null>(null)
-
   const [showDegree, setShowDegree] = useState(false)
   const [isInstrumentsOpen, setIsInstrumentsOpen] = useState(true)
   const [isEqualizerOpen, setIsEqualizerOpen] = useState(false)
@@ -41,7 +39,7 @@ export default function PlayerPage() {
     song: activeSong, stems, loadSong,
     stemStates, isReady, isPlaying, currentTime, duration, masterVolume,
     togglePlay, seek, seekRelative,
-    setMasterVolume, setVolume, setEq, toggleMute, toggleSolo, resetMixer,
+    setMasterVolume, setVolume, setEq, toggleMute, toggleSolo,
   } = usePlayer()
 
   const handleEqChange = useCallback((gains: number[], isExternal: boolean) => {
@@ -93,7 +91,6 @@ export default function PlayerPage() {
   // Fetch song metadata for this page, then hand it to the shared player
   useEffect(() => {
     if (!songId) return
-    setChordData(null)
     setLoading(true)
     api.getSong(songId)
       .then(s => {
@@ -227,6 +224,7 @@ export default function PlayerPage() {
           <div>
             <Lyrics
               songId={song.id}
+              songTitle={song.title}
               currentTime={currentTime}
             />
           </div>
@@ -239,7 +237,6 @@ export default function PlayerPage() {
               currentTime={currentTime}
               showDegree={showDegree}
               onShowDegreeChange={setShowDegree}
-              onChordData={setChordData}
             />
           </div>
 

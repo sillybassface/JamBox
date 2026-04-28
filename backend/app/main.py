@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import init_db, close_db
-from app.tasks.worker import start_worker, stop_worker
+from app.redis_client import close_redis
 from app.auth.router import router as auth_router
 from app.songs.router import router as songs_router
 from app.tasks.router import router as tasks_router
@@ -14,9 +14,8 @@ from app.config import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    await start_worker()
     yield
-    await stop_worker()
+    await close_redis()
     await close_db()
 
 

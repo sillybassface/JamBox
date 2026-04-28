@@ -140,29 +140,17 @@ export const api = {
   },
 
   // Lyrics
-  getLyrics: async (songId: string): Promise<{ lyrics: LyricsData | null; error?: string; task_status?: string; task_step?: string; task_progress?: number }> => {
-    const res = await fetch(`/api/songs/${songId}/lyrics`, { credentials: 'include' })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return res.json()
-  },
-  generateLyrics: (songId: string, language: string = 'vi'): Promise<{ task_id?: string; status: string; lyrics?: LyricsData }> =>
+  getLyrics: (songId: string) =>
+    req<{ lyrics: LyricsData | null; error?: string; task_status?: string; task_step?: string; task_progress?: number }>(
+      `/songs/${songId}/lyrics`
+    ),
+  generateLyrics: (songId: string, language: string = 'kelvin'): Promise<{ task_id?: string; status: string; lyrics?: LyricsData }> =>
     req<{ task_id?: string; status: string; lyrics?: LyricsData }>(`/songs/${songId}/lyrics?language=${language}`, { method: 'POST' }),
-  setCustomLyrics: async (songId: string, lyricsText: string, regenerate = false): Promise<{ task_id?: string; status: string; lyrics?: string }> => {
-    const res = await fetch(`/api/songs/${songId}/lyrics`, {
-      credentials: 'include',
+  setCustomLyrics: (songId: string, lyricsText: string, regenerate = false) =>
+    req<{ task_id?: string; status: string; lyrics?: string }>(`/songs/${songId}/lyrics`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lyrics_text: lyricsText, regenerate }),
-    })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return res.json()
-  },
-  deleteLyrics: async (songId: string): Promise<{ status: string }> => {
-    const res = await fetch(`/api/songs/${songId}/lyrics`, {
-      credentials: 'include',
-      method: 'DELETE',
-    })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    return res.json()
-  },
+    }),
+  deleteLyrics: (songId: string) =>
+    req<{ status: string }>(`/songs/${songId}/lyrics`, { method: 'DELETE' }),
 }

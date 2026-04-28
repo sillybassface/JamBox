@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     port: 8080,
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true, ws: true },
+      '/api': { target: process.env.BACKEND_URL || 'http://localhost:8000', changeOrigin: true, ws: true },
     },
   },
 })

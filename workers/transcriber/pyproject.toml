@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jambox-transcriber"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26",
+    "redis[hiredis]>=5.0",
+    "aiosqlite>=0.20",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "aiofiles>=23.2",
+    "httpx>=0.27",
+    "openai-whisper>=20231117",
+    "transformers>=4.36",
+    "torch>=2.0",
+    "torchaudio>=2.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

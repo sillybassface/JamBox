@@ -8,10 +8,11 @@ interface Props {
 }
 
 const STEPS = [
+  { key: 'starting', label: 'Preparing…' },
   { key: 'downloading', label: 'Downloading audio' },
   { key: 'separating', label: 'Separating stems (AI)' },
-  { key: 'converting', label: 'Converting to MP3' },
   { key: 'waveform', label: 'Generating waveforms' },
+  { key: 'chords', label: 'Analyzing beats and chords' },
 ]
 
 export default function TaskProgress({ taskId, onComplete, onError }: Props) {

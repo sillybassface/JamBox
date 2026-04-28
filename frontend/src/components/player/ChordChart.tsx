@@ -105,7 +105,7 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
               Chord Chart
             </span>
           </button>
-          {status === 'ready' && chordData && isOpen && (
+          {status === 'ready' && chordData && activeSection && isOpen && (
             <span className="text-[10px] font-label text-on-surface-variant/70 tabular-nums px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
               {chordData.key} · {Math.round(chordData.global_tempo)} · {activeSection.time_sig.num}/{activeSection.time_sig.den}
             </span>

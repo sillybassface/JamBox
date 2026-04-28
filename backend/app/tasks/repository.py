@@ -69,3 +69,33 @@ async def get_task_by_song_and_step(
     if not row:
         return None
     return _row_to_task(row)
+
+
+async def get_active_lyrics_task(
+    db: aiosqlite.Connection, song_id: str
+) -> Optional[TaskOut]:
+    """Get the most recent lyrics task regardless of current step name."""
+    async with db.execute(
+        """SELECT * FROM tasks
+           WHERE song_id = ? AND step IN ('lyrics', 'transcribing', 'aligning')
+           AND status IN ('queued', 'running')
+           ORDER BY created_at DESC LIMIT 1""",
+        (song_id,),
+    ) as cur:
+        row = await cur.fetchone()
+    if not row:
+        return None
+    return _row_to_task(row)
+
+
+async def fail_stale_tasks(db: aiosqlite.Connection, error: str) -> None:
+    """Mark in-flight running tasks as failed on worker startup.
+
+    Only targets 'running' — 'queued' tasks are untouched because they still
+    exist in the Redis queue and will be picked up and processed normally.
+    """
+    await db.execute(
+        "UPDATE tasks SET status='failed', error=? WHERE status = 'running'",
+        (error,),
+    )
+    await db.commit()
