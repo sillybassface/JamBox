@@ -28,6 +28,40 @@ def _validate_song_id(song_id: str) -> None:
         raise HTTPException(status_code=400, detail="Invalid song ID format")
 
 
+@router.get("/search")
+async def search_songs(q: str = Query(..., min_length=1)):
+    proc = await asyncio.create_subprocess_exec(
+        "yt-dlp",
+        "--dump-json",
+        "--no-download",
+        "--no-playlist",
+        "--flat-playlist",
+        f"ytsearch5:{q}",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+    stdout, _ = await proc.communicate()
+    results = []
+    for line in stdout.decode().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        youtube_id = item.get("id") or item.get("url", "").split("v=")[-1]
+        results.append({
+            "youtube_id": youtube_id,
+            "youtube_url": f"https://www.youtube.com/watch?v={youtube_id}",
+            "title": item.get("title", ""),
+            "channel": item.get("channel") or item.get("uploader") or "",
+            "duration_secs": item.get("duration"),
+            "thumbnail_url": item.get("thumbnail") or f"https://i.ytimg.com/vi/{youtube_id}/hqdefault.jpg",
+        })
+    return results
+
+
 @router.get("", response_model=list[SongOut])
 async def list_songs(user: UserOut | None = Depends(get_optional_user)):
     db = await get_db()

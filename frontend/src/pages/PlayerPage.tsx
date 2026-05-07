@@ -16,7 +16,6 @@ export default function PlayerPage() {
   const [pageSong, setPageSong] = useState<Song | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showDegree, setShowDegree] = useState(false)
   const [isInstrumentsOpen, setIsInstrumentsOpen] = useState(true)
   const [isEqualizerOpen, setIsEqualizerOpen] = useState(false)
   const [eqPreset, setEqPreset] = useState('Flat')
@@ -119,7 +118,6 @@ export default function PlayerPage() {
       const tag = (e.target as HTMLElement).tagName.toLowerCase()
       if (tag === 'input' || tag === 'textarea') return
       if (e.code === 'Space') { e.preventDefault(); togglePlay() }
-      if (e.code === 'KeyC') { e.preventDefault(); setShowDegree(d => !d) }
       if (e.code === 'ArrowLeft') { e.preventDefault(); seek10(-10) }
       if (e.code === 'ArrowRight') { e.preventDefault(); seek10(10) }
       if (e.code === 'KeyV') { e.preventDefault(); toggleStemMute('v') }
@@ -129,7 +127,7 @@ export default function PlayerPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [togglePlay, seek10, toggleStemMute, setShowDegree])
+  }, [togglePlay, seek10, toggleStemMute])
 
   // The song to display: prefer the page-fetched metadata (freshest); fall back
   // to what's already loaded in the shared player (e.g. navigated here from library)
@@ -235,8 +233,6 @@ export default function PlayerPage() {
               songId={song.id}
               songTitle={song.title}
               currentTime={currentTime}
-              showDegree={showDegree}
-              onShowDegreeChange={setShowDegree}
             />
           </div>
 

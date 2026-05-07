@@ -7,21 +7,27 @@ interface Props {
   songId: string
   songTitle: string
   currentTime: number
-  showDegree?: boolean
-  onShowDegreeChange?: (show: boolean) => void
   onChordData?: (data: ChordData) => void
 }
 
-export default function ChordChart({ songId, songTitle, currentTime, showDegree: externalShowDegree, onShowDegreeChange, onChordData }: Props) {
+type ChordMode = 'name' | 'degree' | 'both'
+
+const CHORD_MODES: { value: ChordMode; label: string; title: string }[] = [
+  { value: 'name',   label: 'Am',    title: 'Chord name' },
+  { value: 'degree', label: 'vi',    title: 'Degree notation' },
+  { value: 'both',   label: 'Am vi', title: 'Both' },
+]
+
+export default function ChordChart({ songId, songTitle, currentTime, onChordData }: Props) {
   const [chordData, setChordData] = useState<ChordData | null>(null)
   const [status, setStatus] = useState<'loading' | 'unavailable' | 'generating' | 'ready' | 'error'>('loading')
-  const [internalShowDegree, setInternalShowDegree] = useState(false)
+  const [mode, setMode] = useState<ChordMode>(() =>
+    (localStorage.getItem('chord_mode') as ChordMode) ?? 'both'
+  )
   const [isOpen, setIsOpen] = useState(() => {
     const saved = localStorage.getItem('panel_chords')
     return saved !== 'collapsed'
   })
-  const showDegree = externalShowDegree ?? internalShowDegree
-  const setShowDegree = onShowDegreeChange ?? setInternalShowDegree
 
   // Resolve active section from playhead position
   const activeSection = useMemo(() => {
@@ -89,6 +95,10 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
     localStorage.setItem('panel_chords', isOpen ? 'open' : 'collapsed')
   }, [isOpen])
 
+  useEffect(() => {
+    localStorage.setItem('chord_mode', mode)
+  }, [mode])
+
   return (
     <div className="px-6 py-3">
       {/* Header */}
@@ -107,24 +117,29 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
           </button>
           {status === 'ready' && chordData && activeSection && isOpen && (
             <span className="text-[10px] font-label text-on-surface-variant/70 tabular-nums px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
-              {chordData.key} · {Math.round(chordData.global_tempo)} · {activeSection.time_sig.num}/{activeSection.time_sig.den}
+              <strong>{chordData.key}</strong> · {Math.round(chordData.global_tempo)} bpm · {activeSection.time_sig.num}/{activeSection.time_sig.den}
             </span>
           )}
         </div>
         {status === 'ready' && isOpen && (
-          <label className="flex items-center gap-1.5 cursor-pointer px-2 py-1 rounded-lg border border-transparent hover:border-white/10 hover:bg-white/5 transition-all">
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={showDegree}
-                onChange={(e) => setShowDegree(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-7 h-4 bg-white/20 rounded-full peer-checked:bg-primary transition-colors" />
-              <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-3" />
-            </div>
-            <span className="text-xs font-label text-on-surface-variant">Degree</span>
-          </label>
+          <div className="flex items-center rounded-lg overflow-hidden border border-white/10 bg-white/[0.04]">
+            {CHORD_MODES.map(({ value, label, title }, i) => (
+              <button
+                key={value}
+                title={title}
+                onClick={() => setMode(value)}
+                className={[
+                  'px-2.5 py-1.5 text-[11px] font-mono font-bold leading-none transition-all',
+                  i > 0 ? 'border-l border-white/10' : '',
+                  mode === value
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-on-surface-variant/50 hover:text-on-surface-variant hover:bg-white/5',
+                ].join(' ')}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -164,7 +179,7 @@ export default function ChordChart({ songId, songTitle, currentTime, showDegree:
               sections={chordData.sections}
               currentTime={currentTime}
               songKey={chordData.key}
-              showDegree={showDegree}
+              mode={mode}
             />
           )}
         </>

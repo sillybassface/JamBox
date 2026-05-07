@@ -16,35 +16,49 @@ export function useTaskWebSocket(
 ) {
   const [event, setEvent] = useState<ProgressEvent | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
-  // Keep onEvent in a ref so changing it doesn't re-open the socket
   const onEventRef = useRef(onEvent)
+  const doneRef = useRef(false)
   useEffect(() => { onEventRef.current = onEvent }, [onEvent])
 
   useEffect(() => {
     if (!taskId) return
+    doneRef.current = false
 
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-    const ws = new WebSocket(`${protocol}://${window.location.host}/api/tasks/${taskId}/ws`)
-    wsRef.current = ws
+    function connect() {
+      if (doneRef.current) return
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+      const ws = new WebSocket(`${protocol}://${window.location.host}/api/tasks/${taskId}/ws`)
+      wsRef.current = ws
 
-    ws.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data)
-        if (data.type !== 'ping') {
-          setEvent(data)
-          onEventRef.current?.(data)
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          if (data.type !== 'ping') {
+            if (data.status === 'completed' || data.status === 'failed') {
+              doneRef.current = true
+            }
+            setEvent(data)
+            onEventRef.current?.(data)
+          }
+        } catch (err) {
+          console.warn('Failed to parse WebSocket message:', err)
         }
-      } catch (e) {
-        console.warn('Failed to parse WebSocket message:', e)
+      }
+
+      ws.onerror = () => console.warn('WebSocket error for task', taskId)
+
+      ws.onclose = () => {
+        if (!doneRef.current) {
+          setTimeout(connect, 2000)
+        }
       }
     }
 
-    ws.onerror = () => {
-      console.warn('WebSocket error for task', taskId)
-    }
+    connect()
 
     return () => {
-      ws.close()
+      doneRef.current = true
+      wsRef.current?.close()
       wsRef.current = null
     }
   }, [taskId])

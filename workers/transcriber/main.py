@@ -4,9 +4,10 @@ import asyncio
 import json
 import logging
 import os
+import time
 
 from app.audio.lyrics_alignment import align_lyrics
-from app.audio.lyrics_detection import _run_whisper, save_lyrics
+from app.audio.lyrics_detection import _run_whisper, save_lyrics, WHISPER_MODEL, WHISPER_MODELS
 from app.config import settings
 from app.database import get_db, init_db
 from app.songs import repository as song_repo
@@ -57,16 +58,23 @@ async def process_lyrics(r, db, task_id: str, song_id: str, language: str):
 
     song_dir = settings.songs_dir / song_id
     logger.info(f"[{task_id}] Running Whisper on {song_dir}")
+    t0 = time.monotonic()
     success = await save_lyrics(song_dir, song.title, song.artist, song.youtube_url, language)
+    elapsed = round(time.monotonic() - t0, 1)
     logger.info(f"[{task_id}] Whisper complete, success={success}")
 
     if success:
         lyrics_path = song_dir / "lyrics.json"
-        if lyrics_path.exists():
-            await song_repo.update_lyrics(db, song_id, json.loads(lyrics_path.read_text()))
+        lyrics_data = json.loads(lyrics_path.read_text()) if lyrics_path.exists() else {}
+        lyrics_data["model"] = WHISPER_MODELS.get(language, WHISPER_MODEL)
+        lyrics_data["transcription_time"] = elapsed
+        lyrics_path.write_text(json.dumps(lyrics_data, indent=2))
+        await song_repo.update_lyrics(db, song_id, lyrics_data)
+        m, s = divmod(int(elapsed), 60)
+        time_str = f"{m}m{s:02d}s" if m else f"{s}s"
         await task_repo.update_task(db, task_id, status="completed", step="done", progress=1.0)
-        await _publish(r, task_id, "completed", "done", 1.0)
-        logger.info(f"[{task_id}] transcription completed for song {song_id}")
+        await _publish(r, task_id, "completed", "done", 1.0, message=f"Lyrics transcribed ({time_str})")
+        logger.info(f"[{task_id}] transcription completed for song {song_id} in {elapsed}s")
     else:
         err = "Whisper failed to detect lyrics"
         await task_repo.update_task(db, task_id, status="failed", step="error", error=err)
@@ -84,10 +92,12 @@ async def process_custom_lyrics(r, db, task_id: str, song_id: str, lyrics_text: 
 
     song_dir = settings.songs_dir / song_id
     loop = asyncio.get_running_loop()
+    t0 = time.monotonic()
     whisper_words = await asyncio.wait_for(
         loop.run_in_executor(None, _run_whisper, song_dir),
         timeout=600,
     )
+    elapsed = round(time.monotonic() - t0, 1)
 
     if lyrics_text and whisper_words:
         final_words = align_lyrics(lyrics_text, whisper_words)
@@ -96,7 +106,13 @@ async def process_custom_lyrics(r, db, task_id: str, song_id: str, lyrics_text: 
     else:
         final_words = []
 
-    lyrics_data = {"words": final_words, "source": "custom", "custom_text": lyrics_text}
+    lyrics_data = {
+        "words": final_words,
+        "source": "custom",
+        "custom_text": lyrics_text,
+        "model": WHISPER_MODEL,
+        "transcription_time": elapsed,
+    }
     await song_repo.update_lyrics(db, song_id, lyrics_data)
 
     try:

@@ -9,24 +9,37 @@ from app.audio.lyrics_detection import _save_lyrics_md
 
 logger = logging.getLogger(__name__)
 
-HF_MODEL_ID = "kelvinbksoh/whisper-medium-vietnamese-lyrics-transcription"
-_CT2_MODEL_DIR = Path("/model_cache/ct2-kelvin")
+_MODELS: dict[str, dict] = {
+    "vi-kelvinbksoh-medium": {
+        "hf_id": "kelvinbksoh/whisper-medium-vietnamese-lyrics-transcription",
+        "ct2_dir": Path("/model_cache/ct2-kelvin-medium"),
+    },
+    "vi-kelvinbksoh-large": {
+        "hf_id": "kelvinbksoh/whisper-large-v2-vietnamese-lyrics-transcription",
+        "ct2_dir": Path("/model_cache/ct2-kelvin-large"),
+    },
+}
+# Legacy / default key
+_MODELS["kelvin"] = _MODELS["vi-kelvinbksoh-medium"]
 
 
-def _ensure_ct2_model() -> Path:
-    """Convert the kelvinbksoh HF model to CTranslate2 format on first use."""
-    if _CT2_MODEL_DIR.exists() and (_CT2_MODEL_DIR / "model.bin").exists():
-        return _CT2_MODEL_DIR
+def _ensure_ct2_model(language: str) -> Path:
+    """Convert the requested kelvinbksoh HF model to CTranslate2 format on first use."""
+    spec = _MODELS.get(language, _MODELS["vi-kelvinbksoh-medium"])
+    hf_id = spec["hf_id"]
+    ct2_dir: Path = spec["ct2_dir"]
+
+    if ct2_dir.exists() and (ct2_dir / "model.bin").exists():
+        return ct2_dir
 
     import subprocess
-    import sys
-    _CT2_MODEL_DIR.parent.mkdir(parents=True, exist_ok=True)
-    logger.info(f"Converting {HF_MODEL_ID} to CTranslate2 format (one-time, may take a few minutes)...")
+    ct2_dir.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Converting {hf_id} to CTranslate2 format (one-time, may take a few minutes)...")
     result = subprocess.run(
         [
             "ct2-transformers-converter",
-            "--model", HF_MODEL_ID,
-            "--output_dir", str(_CT2_MODEL_DIR),
+            "--model", hf_id,
+            "--output_dir", str(ct2_dir),
             "--quantization", "float16",
             "--force",
         ],
@@ -36,10 +49,10 @@ def _ensure_ct2_model() -> Path:
     if result.returncode != 0:
         raise RuntimeError(f"Model conversion failed: {result.stderr[-500:]}")
     logger.info("Model conversion complete")
-    return _CT2_MODEL_DIR
+    return ct2_dir
 
 
-def _run_whisper(song_dir: Path, language: str | None = "vi") -> list[dict]:
+def _run_whisper(song_dir: Path, language: str = "vi-kelvinbksoh-medium") -> list[dict]:
     """Run faster-whisper on the vocals stem using CUDA."""
     vocals_path = song_dir / "stems" / "vocals.mp3"
     if not vocals_path.exists():
@@ -48,11 +61,11 @@ def _run_whisper(song_dir: Path, language: str | None = "vi") -> list[dict]:
     from faster_whisper import WhisperModel
     import ctranslate2
 
-    model_path = _ensure_ct2_model()
+    model_path = _ensure_ct2_model(language)
     device = "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
     compute_type = "float16" if device == "cuda" else "int8"
 
-    logger.info(f"Loading faster-whisper model on {device} ({compute_type})")
+    logger.info(f"Loading faster-whisper model '{language}' on {device} ({compute_type})")
     model = WhisperModel(str(model_path), device=device, compute_type=compute_type)
 
     segments, _ = model.transcribe(

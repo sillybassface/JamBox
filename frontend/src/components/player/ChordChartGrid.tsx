@@ -7,10 +7,10 @@ interface Props {
   sections: Section[]
   currentTime: number
   songKey: string
-  showDegree: boolean
+  mode: 'name' | 'degree' | 'both'
 }
 
-export default function ChordChartGrid({ measures, sections, currentTime, songKey, showDegree }: Props) {
+export default function ChordChartGrid({ measures, sections, currentTime, songKey, mode }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
 
@@ -74,7 +74,7 @@ export default function ChordChartGrid({ measures, sections, currentTime, songKe
     <div
       ref={containerRef}
       className="relative overflow-hidden rounded-lg"
-      style={{ height: 72 }}
+      style={{ height: mode === 'both' ? 88 : 72, background: 'var(--surface)' }}
     >
       {containerWidth > 0 && (
         <>
@@ -120,8 +120,8 @@ export default function ChordChartGrid({ measures, sections, currentTime, songKe
                         className="absolute w-px"
                         style={{
                           left: `${(b / timeSigNum) * 100}%`,
-                          top: isBeat1 ? 6 : '35%',
-                          bottom: isBeat1 ? 6 : '35%',
+                          top: isBeat1 ? 0 : '35%',
+                          bottom: isBeat1 ? 0 : '35%',
                           background: isBeat1
                             ? 'rgba(255,255,255,0.25)'
                             : 'rgba(255,255,255,0.08)',
@@ -138,18 +138,39 @@ export default function ChordChartGrid({ measures, sections, currentTime, songKe
                   {/* Chord labels at beat-fraction positions */}
                   {m.chords.map(entry => {
                     const isN = entry.chord === 'N'
-                    const label = showDegree ? chordToDegree(entry.chord, songKey) : entry.chord
+                    const showName = mode === 'name' || mode === 'both'
+                    const showDeg = mode === 'degree' || mode === 'both'
                     return (
                       <div
                         key={entry.beat}
                         className={[
-                          'absolute inset-y-0 flex items-center pl-2 select-none',
-                          'text-base font-black font-mono leading-none',
-                          isActive ? 'text-primary' : 'text-on-surface/88',
+                          'absolute inset-y-0 pl-2 select-none flex',
+                          mode === 'both' ? 'flex-col justify-center gap-1.5' : 'items-center',
                         ].join(' ')}
                         style={{ left: `${((entry.beat - 1) / timeSigNum) * 100}%` }}
                       >
-                        {isN ? <span className="opacity-25">·</span> : label}
+                        {isN ? (
+                          <span className="text-sm font-black font-mono leading-none opacity-25 text-on-surface/88">·</span>
+                        ) : (
+                          <>
+                            {showName && (
+                              <span className={[
+                                'text-sm font-black font-mono leading-none',
+                                isActive ? 'text-primary' : 'text-on-surface/88',
+                              ].join(' ')}>
+                                {entry.chord}
+                              </span>
+                            )}
+                            {showDeg && (
+                              <span className={[
+                                'text-sm font-medium font-mono leading-none',
+                                isActive ? 'text-amber-400/80' : 'text-sky-400/60',
+                              ].join(' ')}>
+                                {chordToDegree(entry.chord, songKey)}
+                              </span>
+                            )}
+                          </>
+                        )}
                       </div>
                     )
                   })}
@@ -186,14 +207,14 @@ export default function ChordChartGrid({ measures, sections, currentTime, songKe
           {isScrolling && (
             <div
               className="absolute left-0 top-0 h-full w-24 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, var(--surface) 15%, transparent)' }}
+              style={{ background: 'linear-gradient(to right, var(--surface-container) 15%, transparent)' }}
             />
           )}
 
           {/* ── Right edge fade — always visible ─────────────────────── */}
           <div
             className="absolute right-0 top-0 h-full w-24 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to left, var(--surface) 15%, transparent)' }}
+            style={{ background: 'linear-gradient(to left, var(--surface-container) 15%, transparent)' }}
           />
 
           {/* ── Glowing playhead ─────────────────────────────────────── */}

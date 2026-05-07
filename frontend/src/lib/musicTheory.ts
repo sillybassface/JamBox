@@ -17,8 +17,31 @@ function getKeyRootAndMode(key: string): { root: number } {
 
 const DIATONIC_INTERVALS = [0, 2, 4, 5, 7, 9, 11]
 
+function _intervalAbove(bassNote: string, rootNote: string): number {
+  // Diatonic interval from bassNote up to rootNote (1 = unison, 6 = sixth, etc.)
+  const order = 'CDEFGAB'
+  const b = order.indexOf(bassNote[0].toUpperCase())
+  const r = order.indexOf(rootNote[0].toUpperCase())
+  if (b === -1 || r === -1) return 1
+  return ((r - b + 7) % 7) + 1
+}
+
+const _SUPERSCRIPTS = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷']
+
 export function chordToDegree(chord: string, key: string): string {
   if (chord === 'N' || chord === 'X' || !chord) return chord
+
+  // Slash chords (inversions): "Am/E" → "vi⁶", "C/G" → "I⁴"
+  const slashIdx = chord.indexOf('/')
+  if (slashIdx !== -1) {
+    const chordPart = chord.slice(0, slashIdx)
+    const bassNote = chord.slice(slashIdx + 1)
+    const rootMatch = chordPart.match(/^([A-G][#b]?)/)
+    const rootNote = rootMatch ? rootMatch[1] : chordPart
+    const interval = _intervalAbove(bassNote, rootNote)
+    const sup = interval > 1 ? (_SUPERSCRIPTS[interval] ?? String(interval)) : ''
+    return chordToDegree(chordPart, key) + sup
+  }
 
   const { root: keyRoot } = getKeyRootAndMode(key)
 
@@ -52,17 +75,17 @@ export function chordToDegree(chord: string, key: string): string {
   const romanNumsUpper = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
   const romanNumsLower = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii']
 
-  const isMinorChord = quality.includes('m') || quality.includes('dim') || quality === 'ø'
+  const isMinorChord = (quality.startsWith('m') && !quality.startsWith('maj')) || quality.includes('dim') || quality === 'ø'
   const roman = isMinorChord ? romanNumsLower[degreeIdx] : romanNumsUpper[degreeIdx]
 
   const qualityPrefix: Record<string, string> = {
-    '°': '°', '°7': '°⁷', 'ø': 'ø', 'maj7': ' maj7', '+': '+',
-    '7': '⁷', '9': '⁹', '11': '¹¹', '13': '¹³',
-    'sus2': ' sus2', 'sus4': ' sus4', 'add9': ' add9',
+    '°': '°', '°7': '°⁷', 'ø': 'ø', 'maj7': 'Δ7', '+': '+',
+    '7': '7', '9': '9', '11': '11', '13': '13',
+    'sus2': 'sus2', 'sus4': 'sus4', 'add9': 'add9',
   }
   const qualitySuffix: Record<string, string> = {
-    'm': '', 'm7': '', 'm9': '⁹', 'm11': '¹¹', 'm13': '¹³',
-    'dim': '°', 'dim7': '°⁷',
+    'm': '', 'm7': '', 'm9': '9', 'm11': '11', 'm13': '13',
+    'dim': '°', 'dim7': '°7',
   }
 
   let suffix = qualitySuffix[quality] || qualityPrefix[quality] || ''

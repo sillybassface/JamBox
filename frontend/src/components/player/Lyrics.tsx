@@ -16,8 +16,15 @@ type ProgressMessage = {
   error?: string
 }
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return m > 0 ? `${m}m${String(s).padStart(2, '0')}s` : `${s}s`
+}
+
 const LANGUAGES = [
-  { code: 'kelvin', name: 'Vietnamese Lyrics (kelvin) #faster-whisper' },
+  { code: 'vi-kelvinbksoh-medium', name: 'Vietnamese #kelvinbksoh Medium #faster-whisper' },
+  { code: 'vi-kelvinbksoh-large', name: 'Vietnamese #kelvinbksoh Large #faster-whisper' },
   { code: 'vi', name: 'Vietnamese' },
   { code: 'en', name: 'English' },
 ]
@@ -33,7 +40,7 @@ export default function Lyrics({ songId, songTitle, currentTime }: Props) {
   const [showPasteModal, setShowPasteModal] = useState(false)
   const [pasteText, setPasteText] = useState('')
   const [pasting, setPasting] = useState(false)
-  const [language, setLanguage] = useState('kelvin')
+  const [language, setLanguage] = useState('vi-kelvinbksoh-medium')
   const [progressMsg, setProgressMsg] = useState('')
   const [karaoke, setKaraoke] = useState(() => localStorage.getItem('lyrics_karaoke') !== 'false')
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('lyrics_fontsize') || 14))
@@ -85,7 +92,7 @@ export default function Lyrics({ songId, songTitle, currentTime }: Props) {
       if (data.status === 'completed') {
         setProgressMsg('')
         closeEs()
-        update({ songId, type: 'processing' }, { type: 'ready', message: 'Lyrics transcribed', read: false })
+        update({ songId, type: 'processing' }, { type: 'ready', message: data.message || 'Lyrics transcribed', read: false })
         api.getLyrics(songId).then(d => {
           if (d?.lyrics?.words.length) { setLyrics(d.lyrics); setStatus('ready') }
           else setStatus('unavailable')
@@ -213,6 +220,8 @@ export default function Lyrics({ songId, songTitle, currentTime }: Props) {
           {status === 'ready' && lyrics && isOpen && (
             <span className="text-[10px] font-label text-on-surface-variant/70 tabular-nums px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
               {wordCount} words · {phraseCount} phrases
+              {lyrics.model && ` · ${lyrics.model.includes('/') ? lyrics.model.split('/')[1] : lyrics.model}`}
+              {lyrics.transcription_time != null && ` · ${formatTime(lyrics.transcription_time)}`}
             </span>
           )}
         </div>
@@ -222,12 +231,12 @@ export default function Lyrics({ songId, songTitle, currentTime }: Props) {
               onClick={() => setFontSize(s => Math.max(10, s - 2))}
               className="w-6 h-6 flex items-center justify-center rounded-md text-[10px] font-bold bg-white/5 text-on-surface-variant border border-white/10 hover:border-white/20 transition-all"
               title="Decrease font size"
-            >A−</button>
+            >Aa</button>
             <button
               onClick={() => setFontSize(s => Math.min(24, s + 2))}
               className="w-6 h-6 flex items-center justify-center rounded-md text-[10px] font-bold bg-white/5 text-on-surface-variant border border-white/10 hover:border-white/20 transition-all"
               title="Increase font size"
-            >A+</button>
+            >aA</button>
             <button
               onClick={() => setKaraoke(k => !k)}
               className={`px-2.5 py-1 rounded-md text-[10px] font-label border transition-all ${

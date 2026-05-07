@@ -218,13 +218,9 @@ async def save_lyrics(
                 corrections = sum(1 for w in final_words if w.get("corrected"))
                 source = f"hybrid ({corrections} corrections)"
             else:
-                from app.audio.lyrics_alignment import _detect_phrase_boundaries
                 final_words = _whisper_only(whisper_words)
-                final_words = _detect_phrase_boundaries(final_words)
         else:
-            from app.audio.lyrics_alignment import _detect_phrase_boundaries
             final_words = _whisper_only(whisper_words)
-            final_words = _detect_phrase_boundaries(final_words)
 
         for w in final_words:
             w.pop("corrected", None)

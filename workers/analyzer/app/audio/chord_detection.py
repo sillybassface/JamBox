@@ -40,6 +40,7 @@ _TEMPLATES: dict[str, np.ndarray] = {
 _QUALITY_PREFERENCE = ["", "m", "7", "m7", "maj7", "sus4", "sus2", "dim", "aug"]
 _TIEBREAK_THRESHOLD = 0.05
 _MIN_CHORD_SCORE = 0.5
+_INVERSION_MIN_CONFIDENCE = 0.30
 
 # Krumhansl-Schmuckler key profiles
 _KS_MAJOR = np.array(
@@ -178,15 +179,40 @@ def _snap_beats_to_onsets(
     return np.array(result, dtype=int)
 
 
-def _detect_bass_root(bass_chroma: np.ndarray, f0: int, f1: int) -> int | None:
-    """Return the dominant pitch class (0-11) from the bass chroma in the given frame range."""
+def _detect_bass_root(bass_chroma: np.ndarray, f0: int, f1: int) -> tuple[int, float] | None:
+    """Return (dominant pitch class, confidence) from the bass chroma in the given frame range.
+
+    Confidence is the fraction of total chroma energy in the dominant pitch class.
+    Returns None if the bass signal is silent or the frame range is invalid.
+    """
     if f1 <= f0 or f0 >= bass_chroma.shape[1]:
         return None
     f1 = min(f1, bass_chroma.shape[1])
     profile = np.median(bass_chroma[:, f0:f1], axis=1)
-    if float(np.max(profile)) < 1e-3:
+    max_val = float(np.max(profile))
+    if max_val < 1e-3:
         return None
-    return int(np.argmax(profile))
+    confidence = max_val / (float(np.sum(profile)) + 1e-9)
+    return int(np.argmax(profile)), confidence
+
+
+def _chord_root_pc(chord_name: str) -> int | None:
+    """Return pitch class (0-11) of a chord's root note, or None if unparseable."""
+    name = chord_name[:2] if len(chord_name) >= 2 and chord_name[1] == '#' else chord_name[:1]
+    try:
+        return _NOTES.index(name)
+    except ValueError:
+        return None
+
+
+def _apply_inversion(chord: str, bass_root: int | None, confidence: float) -> str:
+    """Append /BASS notation when bass note differs from chord root with sufficient confidence."""
+    if chord == "N" or bass_root is None or confidence < _INVERSION_MIN_CONFIDENCE:
+        return chord
+    root_pc = _chord_root_pc(chord)
+    if root_pc is None or bass_root == root_pc:
+        return chord
+    return f"{chord}/{_NOTES[bass_root]}"
 
 
 def _best_chord(chroma_slice: np.ndarray, bass_root: int | None = None) -> str:
@@ -360,8 +386,12 @@ def detect_chords(song_dir: Path) -> dict:
                 b_end = m_start + (b + 1) * m_beat_dur
                 f0 = int(b_start * frames_per_sec)
                 f1 = int(b_end * frames_per_sec)
-                bass_root = _detect_bass_root(bass_chroma, f0, f1) if bass_chroma is not None else None
-                beat_chords.append(_best_chord(chroma[:, f0:f1], bass_root))
+                bass_result = _detect_bass_root(bass_chroma, f0, f1) if bass_chroma is not None else None
+                bass_root = bass_result[0] if bass_result is not None else None
+                bass_confidence = bass_result[1] if bass_result is not None else 0.0
+                chord = _best_chord(chroma[:, f0:f1], bass_root)
+                chord = _apply_inversion(chord, bass_root, bass_confidence)
+                beat_chords.append(chord)
 
             measures.append({
                 "index": measure_idx,

@@ -92,7 +92,22 @@ export type ChordData = {
 }
 
 export type LyricWord = { word: string; start: number; end: number; is_phrase_start?: boolean }
-export type LyricsData = { words: LyricWord[]; source?: 'whisper' | 'hybrid' | 'external' | 'custom'; custom_text?: string }
+export type LyricsData = {
+  words: LyricWord[]
+  source?: string
+  custom_text?: string
+  model?: string
+  transcription_time?: number
+}
+
+export type SearchResult = {
+  youtube_id: string
+  youtube_url: string
+  title: string
+  channel: string
+  duration_secs?: number
+  thumbnail_url?: string
+}
 
 export const api = {
   // Auth
@@ -104,6 +119,8 @@ export const api = {
   getSong: (id: string) => req<Song>(`/songs/${id}`),
   addSong: (youtube_url: string) =>
     req<{ song: Song; task_id: string }>('/songs', { method: 'POST', body: JSON.stringify({ youtube_url }) }),
+  searchYouTube: (q: string) =>
+    req<SearchResult[]>(`/songs/search?q=${encodeURIComponent(q)}`),
   deleteSong: (id: string) => req<void>(`/songs/${id}`, { method: 'DELETE' }),
 
   // Tasks

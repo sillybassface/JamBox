@@ -11,7 +11,7 @@ QUEUE_TRANSCRIBER = "queue:transcriber"
 QUEUE_TRANSCRIBER_CUDA = "queue:transcriber-cuda"
 
 # Languages that require the CUDA faster-whisper worker.
-_CUDA_LANGUAGES = frozenset({"kelvin"})
+_CUDA_LANGUAGES = frozenset({"kelvin", "vi-kelvinbksoh-medium", "vi-kelvinbksoh-large"})
 
 
 async def _push(queue: str, task_id: str, song_id: str, task_type: str, params: dict):

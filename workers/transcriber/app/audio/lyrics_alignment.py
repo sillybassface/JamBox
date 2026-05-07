@@ -42,34 +42,31 @@ def _whisper_only(whisper_words: list[dict]) -> list[dict]:
     return _detect_phrase_boundaries(final_words)
 
 
+_MIN_PHRASE_GAP = 0.30  # absolute seconds — must have an audible pause to start a new phrase
+
 def _detect_phrase_boundaries(words: list[dict]) -> list[dict]:
-    """Mark phrase-start words (after long pauses or sentence-ending punctuation)."""
+    """Mark phrase-start words (after long pauses or sentence-ending punctuation).
+
+    A phrase boundary is triggered by:
+    - a gap >= _MIN_PHRASE_GAP (audible pause), OR
+    - the previous word ends with sentence-ending punctuation, OR
+    - the current word is capitalised AND there is at least a small gap (>0.05 s) before it
+      — prevents splitting mid-phrase compounds that whisper happens to capitalise at an
+        internal segment boundary with no audible pause between them.
+    """
     if not words:
         return words
 
-    MEDIAN_INTERVAL = _median_interval(words)
     for i, w in enumerate(words):
         prev = words[i - 1] if i > 0 else None
+        gap = (w["start"] - prev["end"]) if prev else 0.0
         w["is_phrase_start"] = bool(
             i == 0
-            or w["start"] - prev["end"] > MEDIAN_INTERVAL * 3
+            or gap >= _MIN_PHRASE_GAP
             or (prev and prev["word"][-1:] in ".!?")
-            or (prev and w["word"][:1].isupper())
+            or (w["word"][:1].isupper() and gap > 0.05)
         )
     return words
-
-
-def _median_interval(words: list[dict]) -> float:
-    """Compute median interval between consecutive words."""
-    if len(words) < 2:
-        return 0.5
-
-    intervals = [words[i + 1]["start"] - words[i]["end"] for i in range(len(words) - 1)]
-    sorted_intervals = sorted(intervals)
-    mid = len(sorted_intervals) // 2
-    if len(sorted_intervals) % 2 == 0:
-        return (sorted_intervals[mid - 1] + sorted_intervals[mid]) / 2
-    return sorted_intervals[mid]
 
 
 def _correct_with_external(whisper_words: list[dict], external_tokens: list[str]) -> dict:

@@ -64,6 +64,8 @@ services:
       context: .
       dockerfile: workers/transcriber/Dockerfile
     restart: unless-stopped
+    env_file:
+      - workers/transcriber/.env
     environment:
       DATA_DIR: /data
       REDIS_URL: redis://redis:6379
@@ -80,6 +82,8 @@ services:
       context: .
       dockerfile: workers/transcriber-cuda/Dockerfile
     restart: unless-stopped
+    env_file:
+      - workers/transcriber-cuda/.env
     environment:
       DATA_DIR: /data
       REDIS_URL: redis://redis:6379
